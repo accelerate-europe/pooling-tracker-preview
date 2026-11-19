@@ -316,9 +316,43 @@ html.public .tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
 .method .todo{color:var(--hot);font-weight:650}
 .pvbar{display:none}
 html.public .app{grid-template-rows:auto auto minmax(0,1fr)}
-html.public .pvbar{display:flex;flex-wrap:wrap;gap:0 10px;align-items:baseline;padding:calc(6px + env(safe-area-inset-top,0px)) 20px 6px;font-size:13px;line-height:1.35;color:var(--ink3);background:var(--panel);border-bottom:1px solid var(--line2)}
+html.public .pvbar{display:flex;flex-wrap:nowrap;gap:0 10px;white-space:nowrap;align-items:center;padding:calc(2px + env(safe-area-inset-top,0px)) 12px 2px 20px;font-size:13px;line-height:1.35;color:var(--ink3);background:var(--panel);border-bottom:1px solid var(--line2)}
 html.public .pvbar b{font-weight:650;color:var(--ink2)}
-@media (max-width:719px){ html.public .pvbar{padding-left:14px;padding-right:14px;font-size:12.5px} }
+html.public .pvbar>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:479px){ html.public .pvbar .pv-l{display:none} }
+@media (max-width:719px){ html.public .pvbar{padding-left:14px;padding-right:6px;font-size:12.5px} }
+/* feedback, public build only */
+.fbbtn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 10px;border-radius:8px;font-weight:650;color:var(--ink);font-size:13.5px}
+.fbbtn .n{font-size:12px;font-weight:700;color:var(--hot)}
+.fbbar{position:fixed;left:0;right:0;top:0;z-index:30;display:flex;align-items:center;gap:6px;padding:calc(4px + env(safe-area-inset-top,0px)) 8px 4px 16px;background:var(--ink);color:var(--ground);font-weight:600;font-size:14px}
+.fbbar[hidden]{display:none}
+.fbbar span{flex:1;min-width:0}
+.fbbar button{min-height:36px;padding:0 10px;border-radius:8px;color:inherit;font-weight:650;white-space:nowrap}
+.fbbar button:last-child{background:color-mix(in srgb,var(--ground) 18%,transparent)}
+html.fbpick :is(.mpanel[data-mode="run"] .mhead,.mpanel[data-mode="run"] .mcell,details[data-runent]>summary,details[data-ent]>summary,details[data-fig]>summary,[data-trun],section.tchart,.method>h2,.method>p,.method>ul){outline:1.5px dashed color-mix(in srgb,var(--hot) 75%,transparent);outline-offset:-1px;cursor:copy}
+[data-fbn]{position:relative}
+[data-fbn]::after{content:attr(data-fbn);position:absolute;top:4px;right:4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--hot);color:#fff;font:700 11px/18px var(--ui);text-align:center;pointer-events:none;box-sizing:border-box}
+details>summary[data-fbn]::after{top:50%;right:34px;transform:translateY(-50%)}
+.fbflash{animation:fbf 1.6s var(--ease)}
+@keyframes fbf{0%,60%{box-shadow:0 0 0 3px var(--hot)}100%{box-shadow:0 0 0 3px transparent}}
+.fbsheet{position:fixed;top:0;right:0;bottom:0;left:0;z-index:40;background:rgba(0,0,0,.34);display:flex;align-items:flex-end;justify-content:center}
+.fbsheet[hidden]{display:none}
+.fbpanel{width:100%;max-width:560px;max-height:min(82vh,720px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--panel);color:var(--ink);border-radius:16px 16px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 32px rgba(0,0,0,.2);box-sizing:border-box}
+@media (min-width:720px){ .fbsheet{align-items:center;padding:24px} .fbpanel{border-radius:16px;padding:24px} }
+.fb-h{margin-bottom:12px}
+.fb-h h2{display:inline;font:700 20px/1.25 var(--read);letter-spacing:-.01em;overflow-wrap:anywhere}
+.fb-h .n{margin-left:8px;color:var(--ink3);font-weight:600}
+.fb-k{font-size:13px;color:var(--ink3);margin-bottom:2px}
+#fbText{display:block;width:100%;font:400 16px/1.45 var(--ui);padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--ground);color:var(--ink);resize:vertical;box-sizing:border-box}
+.fb-act{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+.fb-sub{font:650 15px/1.3 var(--read);margin-top:20px}
+.fb-list{list-style:none;padding:0;margin:8px 0 0}
+.fb-list li{padding:12px 0;border-top:1px solid var(--line2)}
+.fb-on{font-weight:650;overflow-wrap:anywhere}
+.fb-t{margin-top:4px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.fb-m{margin-top:4px;font-size:13px;color:var(--ink3)}
+.fb-l{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:4px}
+.fb-lk{display:inline-flex;align-items:center;min-height:32px;color:var(--ink);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 .rep-h{grid-column:1/-1}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .btn.primary{background:var(--hot);color:#1A1A1A} }
 :root[data-theme="dark"] .btn.primary{background:var(--hot);color:#1A1A1A}
@@ -711,7 +745,8 @@ html.public .pvbar b{font-weight:650;color:var(--ink2)}
 </head>
 <body>
 <div class="app" id="app">
-  <p class="pvbar"><b>Preview, not published</b><span>Record as of 19 November 2026</span></p>
+  <p class="pvbar"><b>Preview, not published</b><span><span class="pv-l">Record as of </span>19 November 2026</span><button type="button" class="fbbtn" data-fb>Feedback <span class="n" id="fbCount"></span></button></p>
+  <div class="fbbar" id="fbBar" role="status" hidden><span>Tap an item to comment</span><button type="button" data-fblist>All comments</button><button type="button" data-fbcancel>Cancel</button></div>
   <header class="top">
     <div class="brand">
       <span class="wm">Pooling Tracker</span>
@@ -2401,6 +2436,145 @@ document.addEventListener("click",function(e){
   else { var h2=b.offsetHeight; d._an=b.animate([{height:h2+"px",opacity:1},{height:"0px",opacity:0}],{duration:240,easing:"cubic-bezier(.4,0,.2,1)"}); d._an.onfinish=function(){ d.open=false; d._an=null; }; }
 });
 
+</script>
+<div class="fbsheet" id="fbSheet" hidden><div class="fbpanel" id="fbPanel" role="dialog" aria-modal="true" aria-label="Feedback"></div></div>
+<script>
+/* Feedback on the public preview: comments are GitHub issues in the preview repository.
+   Tapping Feedback enters pick mode; tapping a run, figure, development, chart or Method section
+   opens a sheet that hands the comment to GitHub's new-issue form, prefilled. Open issues are read
+   back from GitHub's public API and shown as numbered dots and in a list. Only in the --public build. */
+(function(){
+"use strict";
+var REPO="accelerate-europe/pooling-tracker-preview";
+var API="https://api.github.com/repos/"+REPO+"/issues?state=open&per_page=100";
+var SNAP=window.__SNAP||{runs:{},developments:{},figures:{}};
+var MARK=/\x3C!-- pt-anchor: ([^>]+?) -->/; /* written as \x3C so the page's script tag stays plain */
+var items=[], loaded=false, failed=false, picking=false;
+var $=function(id){ return document.getElementById(id); };
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+var MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function day(iso){ var d=new Date(iso); return isNaN(d)?"":d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear(); }
+function view(){ var v=document.querySelector(".view:not([hidden])"); return v?v.id.replace(/^v-/,""):"map"; }
+var VIEWNAME={map:"Map",trends:"Trends",database:"Database",method:"Method"};
+function runName(id){ var r=SNAP.runs&&SNAP.runs[id]; return r&&r.name?r.name:id; }
+
+/* ---------- what a tap points at ---------- */
+var PICKABLE='.mpanel[data-mode="run"] .mhead,.mpanel[data-mode="run"] .mcell,details[data-runent]>summary,details[data-ent]>summary,details[data-fig]>summary,[data-trun],section.tchart,.method>h2,.method>p,.method>ul';
+function hashRun(){ var h=(location.hash||"").slice(1).split("/"); return h[0]==="map"&&h[1]?decodeURIComponent(h[1]):""; }
+function anchorOf(el){
+  var e, id;
+  if((e=el.closest('.mpanel[data-mode="run"] .mcell'))&&(id=hashRun())){ var lab=e.querySelector("span"); lab=lab?lab.textContent.trim():"Figure"; return {key:"run:"+id+"/"+lab,label:runName(id)+" · "+lab,el:e}; }
+  if((e=el.closest('.mpanel[data-mode="run"] #mBody'))&&(id=hashRun())) return {key:"run:"+id,label:runName(id),el:e.querySelector(".mhead")||e};
+  if((e=el.closest("details[data-runent]"))){ id=e.getAttribute("data-runent"); return {key:"run:"+id,label:runName(id),el:e.querySelector("summary")||e}; }
+  if((e=el.closest("[data-trun]"))){ id=e.getAttribute("data-trun"); return {key:"run:"+id,label:runName(id),el:e}; }
+  if((e=el.closest("details[data-ent]"))){ id=e.getAttribute("data-ent"); var d=SNAP.developments&&SNAP.developments[id]; return {key:"dev:"+id,label:d&&d.title?d.title:id,el:e.querySelector("summary")||e}; }
+  if((e=el.closest("details[data-fig]"))){ id=e.getAttribute("data-fig"); var f=SNAP.figures&&SNAP.figures[id]; return {key:"fig:"+id,label:f?(f.subject||id)+" · "+String(f.metric||"").replace(/_/g," "):id,el:e.querySelector("summary")||e}; }
+  if((e=el.closest("section.tchart"))){ var h=e.querySelector("h2"); h=h?h.textContent.trim():"Chart"; return {key:"chart:"+h,label:"Trends · "+h,el:e}; }
+  if((e=el.closest(".method>*"))){ var s=e; while(s&&s.tagName!=="H2") s=s.previousElementSibling; if(s) return {key:"method:"+s.textContent.trim(),label:"Method · "+s.textContent.trim(),el:s}; }
+  var v=view(); return {key:"page:"+v,label:VIEWNAME[v]||v,el:null};
+}
+
+/* ---------- reading comments back ---------- */
+function parse(issue){
+  var body=String(issue.body||""), m=body.match(MARK), on=body.match(/\nOn: ([^\n]+)/);
+  var text=body.split(/\n\n---\nOn: /)[0].replace(MARK,"").trim();
+  return {key:m?m[1].trim():"page:general",label:on?on[1].trim():issue.title.replace(/^Feedback: /,""),text:text,user:issue.user&&issue.user.login||"",date:issue.created_at,replies:issue.comments||0,url:issue.html_url,n:issue.number};
+}
+function load(){
+  if(!window.fetch) return;
+  fetch(API,{headers:{Accept:"application/vnd.github+json"}}).then(function(r){ if(!r.ok) throw r.status; return r.json(); }).then(function(list){
+    items=list.filter(function(i){ return !i.pull_request; }).map(parse); loaded=true; failed=false; paint();
+  }).catch(function(){ failed=true; paint(); });
+}
+function countFor(key,deep){ return items.filter(function(c){ return c.key===key||(deep&&c.key.indexOf(key+"/")===0); }).length; }
+
+/* ---------- dots and the count ---------- */
+var pq=0;
+function paint(){ pq=0;
+  var b=$("fbCount"); if(b) b.textContent=loaded&&items.length?items.length:"";
+  Array.prototype.forEach.call(document.querySelectorAll("[data-fbn]"),function(e){ e.removeAttribute("data-fbn"); });
+  if(!items.length) return;
+  Array.prototype.forEach.call(document.querySelectorAll(PICKABLE),function(el){
+    if(!el.getClientRects().length) return;
+    var a=anchorOf(el); if(!a.el||a.el!==el) return;
+    var n=countFor(a.key,/^run:[^/]+$/.test(a.key)); if(n) el.setAttribute("data-fbn",n);
+  });
+  if($("fbSheet").getAttribute("data-mode")==="list") list();
+}
+function soon(){ if(!pq) pq=setTimeout(paint,250); }
+
+/* ---------- pick mode ---------- */
+function setPick(on){ picking=on; document.documentElement.classList.toggle("fbpick",on); $("fbBar").hidden=!on; }
+function intercept(e){
+  if(!picking) return;
+  if(e.target.closest(".pvbar,#fbBar,#fbSheet")) return;
+  e.stopPropagation(); if(e.type==="click") e.preventDefault();
+  if(e.type!=="click") return;
+  var a=anchorOf(e.target); setPick(false); compose(a);
+}
+["pointerdown","pointerup","mousedown","mouseup","touchend","click"].forEach(function(t){ document.addEventListener(t,intercept,true); });
+
+/* ---------- the sheet ---------- */
+function open(mode,html){ var s=$("fbSheet"); s.setAttribute("data-mode",mode); $("fbPanel").innerHTML=html; s.hidden=false; document.documentElement.classList.add("fbopen"); }
+function shut(){ $("fbSheet").hidden=true; $("fbSheet").removeAttribute("data-mode"); document.documentElement.classList.remove("fbopen"); }
+var cur=null;
+function compose(a){ cur=a;
+  var here=items.filter(function(c){ return c.key===a.key; });
+  open("compose",'<div class="fb-h"><p class="fb-k">Comment on</p><h2>'+esc(a.label)+'</h2></div>'+
+    '<label class="sr" for="fbText">Comment</label><textarea id="fbText" rows="5" placeholder="What should change, and the source if you have one"></textarea>'+
+    '<div class="fb-act"><button type="button" class="btn primary" data-fbpost>Post on GitHub</button><button type="button" class="btn" data-fbclose>Cancel</button></div>'+
+    (here.length?'<h3 class="fb-sub">On this</h3>'+rows(here):""));
+  setTimeout(function(){ var t=$("fbText"); if(t) t.focus({preventScroll:true}); },60);
+}
+function rows(cs){ return '<ol class="fb-list">'+cs.map(function(c){
+  return '<li><p class="fb-on">'+esc(c.label)+'</p>'+(c.text?'<p class="fb-t">'+esc(c.text)+'</p>':"")+
+    '<p class="fb-m">'+esc(c.user)+' · '+esc(day(c.date))+(c.replies?' · '+c.replies+(c.replies===1?" reply":" replies"):"")+'</p>'+
+    '<p class="fb-l"><button type="button" class="fb-lk" data-fbgo="'+esc(c.key)+'">Show on page</button><a class="fb-lk" href="'+esc(c.url)+'" target="_blank" rel="noopener">Open on GitHub</a></p></li>';
+}).join("")+'</ol>'; }
+function list(){
+  var body=failed?'<p class="fb-t">Comments could not be loaded. <a class="fb-lk" href="https://github.com/'+REPO+'/issues" target="_blank" rel="noopener">See them on GitHub</a></p>':
+    !loaded?'<p class="fb-t">Loading comments</p>':items.length?rows(items):'<p class="fb-t">No comments yet.</p>';
+  open("list",'<div class="fb-h"><h2>Feedback</h2><span class="n">'+(items.length||"")+'</span></div>'+
+    '<div class="fb-act"><button type="button" class="btn primary" data-fbpick>Comment on something</button><button type="button" class="btn" data-fbclose>Close</button></div>'+body);
+}
+function post(){
+  var t=($("fbText")||{}).value||"", a=cur; if(!a) return;
+  var page=location.href.split("#")[0]+(a.key.indexOf("run:")===0?"#map/"+encodeURIComponent(a.key.slice(4).split("/")[0]):"#"+view());
+  var body=t.trim()+"\n\n---\nOn: "+a.label+"\nPage: "+page+"\n\x3C!-- pt-anchor: "+a.key+" -->";
+  var url="https://github.com/"+REPO+"/issues/new?title="+encodeURIComponent("Feedback: "+a.label)+"&body="+encodeURIComponent(body);
+  window.open(url,"_blank","noopener"); shut();
+}
+function go(key){
+  shut(); var p=key.split(":"), kind=p[0], rest=p.slice(1).join(":");
+  var after=function(sel,fn){ setTimeout(function(){ if(fn) fn(); var el=typeof sel==="function"?sel():document.querySelector(sel); if(!el) return; if(el.tagName==="DETAILS") el.open=true; el.scrollIntoView({block:"center",inline:"nearest"}); el.classList.add("fbflash"); setTimeout(function(){ el.classList.remove("fbflash"); },1600); },420); };
+  if(kind==="run"){ location.hash="map/"+encodeURIComponent(rest.split("/")[0]); return; }
+  if(kind==="dev"){ location.hash="database"; after('details[data-ent="'+rest.replace(/"/g,"")+'"]',function(){ var b=document.querySelector('[data-dbs="devs"]'); if(b&&b.getAttribute("aria-pressed")!=="true") b.click(); }); return; }
+  if(kind==="fig"){ location.hash="trends"; after('details[data-fig="'+rest.replace(/"/g,"")+'"]'); return; }
+  if(kind==="chart"){ location.hash="trends"; after(function(){ return [].filter.call(document.querySelectorAll("section.tchart"),function(s){ var h=s.querySelector("h2"); return h&&h.textContent.trim()===rest; })[0]; }); return; }
+  if(kind==="method"){ location.hash="method"; after(function(){ return [].filter.call(document.querySelectorAll(".method>h2"),function(h){ return h.textContent.trim()===rest; })[0]; }); return; }
+  if(VIEWNAME[rest]) location.hash=rest;
+}
+
+/* ---------- wiring ---------- */
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-fb],[data-fbcancel],[data-fblist],[data-fbclose],[data-fbpost],[data-fbpick],[data-fbgo],#fbSheet");
+  if(!t) return;
+  if(t.hasAttribute("data-fb")){ if(picking) setPick(false); else { shut(); setPick(true); } }
+  else if(t.hasAttribute("data-fbcancel")) setPick(false);
+  else if(t.hasAttribute("data-fblist")){ setPick(false); list(); }
+  else if(t.hasAttribute("data-fbclose")) shut();
+  else if(t.hasAttribute("data-fbpost")) post();
+  else if(t.hasAttribute("data-fbpick")){ shut(); setPick(true); }
+  else if(t.hasAttribute("data-fbgo")) go(t.getAttribute("data-fbgo"));
+  else if(t.id==="fbSheet"&&e.target===t) shut();
+});
+document.addEventListener("keydown",function(e){ if(e.key!=="Escape") return; if(picking) setPick(false); else if(!$("fbSheet").hidden) shut(); });
+document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible") load(); });
+new MutationObserver(soon).observe(document.querySelector("main"),{childList:true,subtree:true});
+window.addEventListener("hashchange",soon);
+load();
+window.__fb={items:function(){ return items; },anchorOf:anchorOf,reload:load};
+})();
 </script>
 </body>
 </html>
