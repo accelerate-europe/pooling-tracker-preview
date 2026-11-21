@@ -836,6 +836,7 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
 .kchip.static{cursor:default}
 @media (hover:hover){ .mco:hover i{transform:scale(1.15)} .mcorow:hover{background:var(--line2)} }
 .kprods{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.mcos{display:flex;flex-wrap:wrap;gap:6px}.mcos .cosq{margin-right:7px}
 
 @media (hover:hover){
   .tabs a:hover{background:var(--line2);color:var(--ink)}
@@ -2162,7 +2163,7 @@ function detailHtml(r){
     h+='<dl class="facts"><dt>At this site</dt><dd'+(p&&p.at?"":' class="quiet"')+'>'+(p&&p.at?esc(p.at):"Not given")+'</dd>'+(s.coordNote?'<dt>On the map</dt><dd>'+esc(s.coordNote)+'</dd>':"")+'</dl>';
     if(others.length) h+='<p class="mlab">Other runs here</p><div class="mothers">'+others.map(function(o){ return '<button type="button" data-mpick="'+esc(o.id)+'" data-mf="'+esc(focus)+'"><i class="kd '+kc(o)+'"></i><span><b>'+esc(o.name)+'</b><small>'+esc(o.org)+'</small></span></button>'; }).join("")+'</div>';
   }
-  h+='<p class="mlab">How it ran</p><dl class="facts mhow"><dt>Coordination</dt><dd>'+(r.k>=0?(coordConcept(r.k)?'<button type="button" class="link mcon" data-kbcon="'+coordConcept(r.k)+'">'+COORD[r.k]+'</button>':COORD[r.k]):'<span class="quiet">Not given</span>')+(r.owners?'<small class="n">'+plural(r.owners,"owner")+'</small>':"")+'</dd><dt>Method</dt><dd>'+(r.method?esc(r.method.charAt(0).toUpperCase()+r.method.slice(1)):'<span class="quiet">Not given</span>')+'</dd><dt>Software</dt><dd>'+(r.software?esc(r.software):'<span class="quiet">Not given</span>')+'</dd></dl>';
+  h+='<p class="mlab">How it ran</p><dl class="facts mhow"><dt>Coordination</dt><dd>'+(r.k>=0?(coordConcept(r.k)?'<button type="button" class="link mcon" data-kbcon="'+coordConcept(r.k)+'">'+COORD[r.k]+'</button>':COORD[r.k]):'<span class="quiet">Not given</span>')+(r.owners?'<small class="n">'+plural(r.owners,"owner")+'</small>':"")+'</dd>'+(runCos(r).length?'<dt>Companies</dt><dd class="mcos">'+runCos(r).map(function(c){ return '<button type="button" class="kchip" data-mcogo="'+esc(c.id)+'"><i class="cosq t-'+c.type+'"></i>'+esc(c.name)+'</button>'; }).join("")+'</dd>':"")+'<dt>Method</dt><dd>'+(r.method?esc(r.method.charAt(0).toUpperCase()+r.method.slice(1)):'<span class="quiet">Not given</span>')+'</dd><dt>Software</dt><dd>'+(r.software?esc(r.software):'<span class="quiet">Not given</span>')+'</dd></dl>';
   h+=(r.note?'<p class="mnote">'+esc(r.note)+'</p>':"")+sourcesHtml(r);
   var d=BY[r.dev];
   h+='<details class="ent mfull"><summary><span class="ent-s"><span class="t">Full record</span>'+CHEV+'</span></summary><div class="ent-body">'+runFacts(r)+(d&&d.status==="approved"?'<button type="button" class="btn quiet" data-rundb="'+esc(d.id)+'">Open the news entry</button>':"")+'</div></details>';
@@ -2396,7 +2397,7 @@ function play(){
     var b=mbox.getBoundingClientRect(); MP.tapAt=Date.now(); mapTap(e.clientX-b.left,e.clientY-b.top); });
   mbox.addEventListener("pointercancel",function(){ tp=null; setHover(""); });
   v.addEventListener("click",function(e){
-    var t=e.target.closest("[data-mfopen],[data-mfclose],[data-mfclear],[data-mpx],[data-mlayer],[data-mjur],[data-mregs],[data-mev],[data-msite],[data-mfocus],[data-mpick],[data-mreg],[data-mdesel],[data-mstep],[data-mlist],[data-mf2],[data-mkind],[data-mmore],[data-mzoom],[data-mplay],[data-myears],[data-y],[data-mqclear],[data-mctryx],[data-mshare],[data-mcmp],[data-mcmpx],[data-mswap],[data-mco],[data-mcocl],[data-mcorun],[data-mcoall],[data-mcot],#mGrab");
+    var t=e.target.closest("[data-mfopen],[data-mfclose],[data-mfclear],[data-mpx],[data-mlayer],[data-mjur],[data-mregs],[data-mev],[data-msite],[data-mfocus],[data-mpick],[data-mreg],[data-mdesel],[data-mstep],[data-mlist],[data-mf2],[data-mkind],[data-mmore],[data-mzoom],[data-mplay],[data-myears],[data-y],[data-mqclear],[data-mctryx],[data-mshare],[data-mcmp],[data-mcmpx],[data-mswap],[data-mco],[data-mcogo],[data-mcocl],[data-mcorun],[data-mcoall],[data-mcot],#mGrab");
     if(!t||(t.hasAttribute("data-msite")&&e.detail)){
       /* A pointer tap on the map: resolved by distance. A keyboard press on a site button falls through to the site. */
       if(e.target.closest("#mapbox")&&!e.target.closest(".mregs,.mzoom,.mchoose,.mtop,.mpills,.mjur,.mco")&&MP.built&&Date.now()-(MP.tapAt||0)>700){ var b=$("mapbox").getBoundingClientRect(); mapTap(e.clientX-b.left,e.clientY-b.top); }
@@ -2407,7 +2408,8 @@ function play(){
     if(t.hasAttribute("data-mfclear")){ clearFilters(); return; }
     if(t.hasAttribute("data-mpx")){ dropFilter(t.getAttribute("data-mpx")); return; }
     if(t.hasAttribute("data-mlayer")){ setLayer(t.getAttribute("data-mlayer")); return; }
-    if(t.hasAttribute("data-mco")){ pickCo(t.getAttribute("data-mco")); return; }
+    if(t.hasAttribute("data-mco")){ pickCo(t.getAttribute("data-mco"),!!t.closest("#mBody")); return; }
+    if(t.hasAttribute("data-mcogo")){ var cg=t.getAttribute("data-mcogo"); setLayer("co"); pickCo(cg,true); return; }
     if(t.hasAttribute("data-mcocl")){ coCluster(t.getAttribute("data-mcocl").split(",")); return; }
     if(t.hasAttribute("data-mcoall")){ MP.coCl=null; renderPanel(); return; }
     if(t.hasAttribute("data-mcot")){ var ct=t.getAttribute("data-mcot"); MP.coT=MP.coT===ct?"":ct; if(MP.coSel){ var sc=coBy(MP.coSel); if(sc&&!coIn(sc)) MP.coSel=""; } renderPanel(true); return; }
@@ -2870,6 +2872,7 @@ function kEmpty(sec){
 /* A run's sites, each with the number of runs held there; tapping one lists those runs. */
 function siteChips(r){ var ids=siteIds(r).filter(function(x){ return SBY[x]; }); if(!ids.length) return "";
   return '<p class="kx"><span>Sites</span>'+ids.map(function(x){ var n=S.runs.filter(function(o){ return siteIds(o).indexOf(x)>=0; }).length; return '<button type="button" class="kchip" data-kbsite="'+esc(x)+'"'+(KB.site===x?' aria-pressed="true"':"")+'>'+esc(SBY[x].name)+(n>1?' <span class="n">'+plural(n,"run")+'</span>':"")+'</button>'; }).join("")+'</p>'; }
+function coChips(r){ var cs=runCos(r); return cs.length?'<p class="kx"><span>Companies</span>'+cs.map(function(c){ return '<button type="button" class="kchip" data-kbco="'+esc(c.id)+'"><i class="cosq t-'+c.type+'" style="margin-right:7px"></i>'+esc(c.name)+'</button>'; }).join("")+'</p>':""; }
 function conChips(list){ return list.length?'<p class="kx"><span>Concepts</span>'+list.map(function(c){ return '<button type="button" class="kchip" data-kbcon="'+esc(c.id)+'">'+esc(c.term)+'</button>'; }).join("")+'</p>':""; }
 
 function renderRunList(){
@@ -2879,7 +2882,7 @@ function renderRunList(){
   if(!list.length){ el.innerHTML=h+kEmpty("runs"); return; }
   h+='<div class="ents">';
   list.forEach(function(r){
-    h+='<details class="ent" data-runent="'+esc(r.id)+'"'+(open[r.id]?" open":"")+'><summary><span class="ent-s"><span><span class="t">'+esc(r.name)+'</span><span class="meta"><b>'+esc(r.org)+'</b><span>'+fmtDate(r)+'</span>'+(r.params?'<span class="n">'+fmtParams(r.params)+'</span>':"")+'</span></span>'+CHEV+'</span></summary><div class="ent-body">'+runBody(r)+siteChips(r)+conChips(runConcepts(r))+'<span class="kact">'+(r.placed.length?'<a class="btn quiet" href="#map/'+esc(r.id)+'">Show on the map</a>':"")+(onMap(r)&&S.runs.length>1?'<button type="button" class="btn quiet" data-kbcmp="'+esc(r.id)+'">Compare</button>':"")+'</span></div></details>';
+    h+='<details class="ent" data-runent="'+esc(r.id)+'"'+(open[r.id]?" open":"")+'><summary><span class="ent-s"><span><span class="t">'+esc(r.name)+'</span><span class="meta"><b>'+esc(r.org)+'</b><span>'+fmtDate(r)+'</span>'+(r.params?'<span class="n">'+fmtParams(r.params)+'</span>':"")+'</span></span>'+CHEV+'</span></summary><div class="ent-body">'+runBody(r)+siteChips(r)+coChips(r)+conChips(runConcepts(r))+'<span class="kact">'+(r.placed.length?'<a class="btn quiet" href="#map/'+esc(r.id)+'">Show on the map</a>':"")+(onMap(r)&&S.runs.length>1?'<button type="button" class="btn quiet" data-kbcmp="'+esc(r.id)+'">Compare</button>':"")+'</span></div></details>';
   });
   el.innerHTML=h+'</div>';
 }
@@ -2958,12 +2961,13 @@ function openConcept(id){ kReveal("con",'[data-concept="'+String(id).replace(/"/
 function openRule(id){ kReveal("reg",'[data-rule="'+String(id).replace(/"/g,"")+'"]'); }
 
 document.addEventListener("click",function(e){
-  var t=e.target.closest("[data-kbfopen],[data-kbdone],[data-kbclear],[data-kbpx],[data-kbk],[data-kbev],[data-kby],[data-kba],[data-kbsort],[data-kbth],[data-kbt],[data-kbr],[data-kbj],[data-kbs],[data-kbcon],[data-kbrule],[data-kbconruns],[data-kbsite],[data-kbcmp],#kbX,#kbFilt");
+  var t=e.target.closest("[data-kbfopen],[data-kbdone],[data-kbclear],[data-kbpx],[data-kbk],[data-kbev],[data-kby],[data-kba],[data-kbsort],[data-kbth],[data-kbt],[data-kbr],[data-kbj],[data-kbs],[data-kbcon],[data-kbrule],[data-kbconruns],[data-kbsite],[data-kbcmp],[data-kbco],#kbX,#kbFilt");
   if(!t) return;
   if(t.id==="kbFilt"){ if(e.target===t) kCloseFilters(); return; }
   var sec=S.dbTab, tog=function(k,v){ KB[k]=KB[k]===v?(k==="k"?-1:""):v; };
   if(t.hasAttribute("data-kbfopen")){ kOpenFilters(); return; }
   if(t.hasAttribute("data-kbdone")){ kCloseFilters(); return; }
+  if(t.hasAttribute("data-kbco")){ location.hash="map/c/"+encodeURIComponent(t.getAttribute("data-kbco")); return; }
   if(t.hasAttribute("data-kbcmp")){ var ci=t.getAttribute("data-kbcmp"); MP.cmp=ci; location.hash="map/"+encodeURIComponent(ci); return; }
   if(t.hasAttribute("data-kbsite")){ var si=t.getAttribute("data-kbsite"); S.dbTab="runs"; KB.site=KB.site===si?"":si; renderDatabase(); intoView($("kbBar"),true); return; }
   if(t.hasAttribute("data-kbcon")){ openConcept(t.getAttribute("data-kbcon")); return; }
@@ -3022,7 +3026,7 @@ function coPaint(){
   coPlace();
 }
 function coPlace(){ var lab=$("mCoLab"); if(!lab||MP.layer!=="co"||!MP.t) return; var sz=mapSize(), low=side()?sz[1]:sz[1]-(MP.vis||0);
-  Array.prototype.forEach.call(lab.children,function(el){ var p=MP.t.apply(PROJ([+el.getAttribute("data-lon"),+el.getAttribute("data-lat")])); el.hidden=p[0]<6||p[0]>sz[0]-6||p[1]<52||p[1]>low-6; el.style.transform="translate("+p[0].toFixed(1)+"px,"+p[1].toFixed(1)+"px)"; });
+  Array.prototype.forEach.call(lab.children,function(el){ var p=MP.t.apply(PROJ([+el.getAttribute("data-lon"),+el.getAttribute("data-lat")])); el.hidden=p[0]<22||p[0]>sz[0]-22||p[1]<60||p[1]>low-22; el.style.transform="translate("+p[0].toFixed(1)+"px,"+p[1].toFixed(1)+"px)"; });
   coLabels(); }
 /* Names show beside single markers when there is room, never over another marker. */
 function coLabels(){ var lab=$("mCoLab"); if(!lab) return; var box=lab.getBoundingClientRect(), taken=[];
@@ -3030,7 +3034,11 @@ function coLabels(){ var lab=$("mCoLab"); if(!lab) return; var box=lab.getBoundi
   Array.prototype.forEach.call(lab.querySelectorAll(".mco:not(.cl) b"),function(b){ var el=b.parentNode; el.classList.remove("nol"); if(el.hidden) return; var r=b.getBoundingClientRect(), mb=$("mapbox").getBoundingClientRect();
     var bad=r.right>mb.right-4||taken.some(function(t){ var mine=el.querySelector("i").getBoundingClientRect(); if(Math.abs(t[0]-mine.left+3)<1&&Math.abs(t[1]-mine.top+3)<1) return false; return r.left<t[2]&&t[0]<r.right&&r.top<t[3]&&t[1]<r.bottom; });
     if(bad) el.classList.add("nol"); else taken.push([r.left,r.top,r.right,r.bottom]); }); }
-function pickCo(id){ MP.coSel=id; MP.coCl=null; setCoHash(); coPaint(); renderPanel(); if(id&&!side()&&MP.detent==="peek") setDetent("half"); }
+function pickCo(id,fromList){ MP.coSel=id; MP.coCl=null; setCoHash(); coPaint(); renderPanel(); if(id&&!side()&&MP.detent!=="half") setDetent("half");
+  /* Picked from the list, the map moves so the company sits in view above the sheet. */
+  var c=coBy(id); if(c&&fromList&&MP.built) requestAnimationFrame(function(){ if(MP.coSel!==id) return; var p=PROJ([c.lon,c.lat]); flyTo(fitT([p[0],p[1],p[0],p[1]],60,true),false,function(){ coPaint(); }); }); }
+/* The companies named in a run's organisation or listing the run, for the run's panel. */
+function runCos(r){ return S.companies.filter(function(c){ return coRuns(c).some(function(x){ return x.id===r.id; }); }); }
 function setCoHash(){ try{ history.replaceState(null,"","#map"+(MP.layer==="co"?"/c"+(MP.coSel?"/"+encodeURIComponent(MP.coSel):""):"")); }catch(e){} }
 function coCluster(ids){ var m=ids.map(coBy).filter(Boolean); if(!m.length) return;
   var xs=m.map(function(c){ return PROJ([c.lon,c.lat]); }), b=[Math.min.apply(null,xs.map(function(p){return p[0];})),Math.min.apply(null,xs.map(function(p){return p[1];})),Math.max.apply(null,xs.map(function(p){return p[0];})),Math.max.apply(null,xs.map(function(p){return p[1];}))];
