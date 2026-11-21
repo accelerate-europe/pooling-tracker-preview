@@ -1970,7 +1970,8 @@ function linksNear(x,y,R){ var by={};
 function mapTap(x,y){
   chooser(null);
   /* In the Regulation layer a tap picks the jurisdiction under it, or clears the choice. */
-  if(MP.layer==="co") return;
+  /* In the Companies layer a tap on the map away from a marker closes the open company or list. */
+  if(MP.layer==="co"){ if(MP.coSel||MP.coCl){ MP.coCl=null; pickCo(""); if(!side()&&MP.detent!=="full") setDetent("peek"); } return; }
   if(MP.layer==="reg"){ var wr=MP.t.invert([x,y]), jr=jurOfCtry(wr?ctryAt(wr[0],wr[1]):""); pickJur(jr&&regCounts()[jr]?jr:""); return; }
   var touch=MP.touch, h=hitAt(x,y), near=h.dots.filter(function(d){ return d.d<=(touch?20:11); }), links=linksNear(x,y,touch?18:9);
   var dotFirst=near.length&&(!links.length||near[0].d<=links[0].d+4);
