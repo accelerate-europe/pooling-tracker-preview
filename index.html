@@ -410,7 +410,7 @@ details>summary[data-fbn]::after{top:50%;right:34px;transform:translateY(-50%)}
 .mapbox{position:absolute;top:0;right:0;bottom:0;left:0;background:radial-gradient(120% 90% at 50% 40%,color-mix(in srgb,var(--sea) 86%,#fff 4%),var(--sea));overflow:hidden;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none;isolation:isolate}
 .mapbox:active{cursor:grabbing}
 #mSvg{position:absolute;top:0;left:0;width:100%;height:100%;display:block}
-#mLand{fill:var(--land);stroke:var(--coast);stroke-width:.6;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+#mLand,#mLandC{fill:var(--land);stroke:var(--coast);stroke-width:.6;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 .ctry{fill:color-mix(in srgb,var(--land) 84%,var(--hot) 16%);opacity:0;transition:opacity .5s var(--ease),fill .3s var(--ease);pointer-events:none}.ctry.on{opacity:1}.ctry.sel{fill:color-mix(in srgb,var(--land) 76%,var(--hot) 24%);stroke:color-mix(in srgb,var(--hot) 70%,transparent);stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 #mBord{fill:none;stroke:var(--bord);stroke-width:.6;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 .k0{--c:var(--mk0)} .k1{--c:var(--mk1)} .k2{--c:var(--mk2)} .k3{--c:var(--mk3)}
@@ -837,6 +837,8 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
 @media (hover:hover){ .mco:hover i{transform:scale(1.15)} .mcorow:hover{background:var(--line2)} }
 .kprods{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .mcos{display:flex;flex-wrap:wrap;gap:6px}.mcos .cosq{margin-right:7px}
+#mFx{transition:opacity .2s var(--ease),visibility .2s}
+#mFx.still{opacity:0;visibility:hidden}
 
 @media (hover:hover){
   .tabs a:hover{background:var(--line2);color:var(--ink)}
@@ -953,7 +955,7 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
       </div></div>
       <div class="mwrap" id="mWrap">
         <div class="mapbox" id="mapbox">
-          <svg id="mSvg" aria-hidden="true"><g id="mW"><path id="mLand" d=""/><g id="mCtry"></g><g id="mPol"></g><path id="mBord" d=""/></g></svg>
+          <svg id="mSvg" aria-hidden="true"><g id="mW"><path id="mLand" d=""/><path id="mLandC" d=""/><g id="mCtry"></g><g id="mPol"></g><path id="mBord" d=""/></g></svg>
           <svg id="mOv" role="img" aria-label="World map of training runs whose sites are named"><g id="oArcs"></g><g id="oSites"></g></svg>
           <canvas id="mFx" aria-hidden="true"></canvas>
           <div id="mLabels"></div>
@@ -1769,7 +1771,22 @@ function fitT(box,minSpan,bare,maxK){
 }
 var ZOOM=null, FLY=0;
 /* Flights follow the smooth zoom-and-pan path of van Wijk and Nuij, and take their length from the distance travelled. */
+/* Glide: after a flick the map keeps moving and slows to a stop, as in a phone's own maps; a slow drag stops where it is let go. */
+var GL={s:[],raf:0,pinch:false,k:0,stopAt:0};
+function glideStop(){ if(GL.raf){ cancelAnimationFrame(GL.raf); GL.raf=0; GL.stopAt=Date.now(); declutter(); stillFx(false); } }
+/* While a finger pans or the map glides, the moving lights rest: drawing them over a moving map costs more than they add. */
+function stillFx(on){ var c=$("mFx"); if(c) c.classList.toggle("still",on); if(!on) kick(); }
+function glideFrom(vx,vy){ /* velocity in pixels per millisecond */
+  var last=performance.now(), sel=d3.select("#mapbox");
+  var step=function(now){ var d=Math.min(64,now-last); last=now; var f=Math.pow(.9975,d); vx*=f; vy*=f;
+    if(Math.hypot(vx,vy)<.05){ GL.raf=0; declutter(); stillFx(false); return; }
+    var t=MP.t, nt=d3.zoomIdentity.translate(t.x+vx*d,t.y+vy*d).scale(t.k); sel.call(ZOOM.transform,nt);
+    /* At the edge of the world the glide stops instead of pressing on. */
+    if(Math.abs(MP.t.x-nt.x)>.5) vx=0; if(Math.abs(MP.t.y-nt.y)>.5) vy=0;
+    GL.raf=requestAnimationFrame(step); };
+  GL.raf=requestAnimationFrame(step); }
 function flyTo(t,now,done){
+  glideStop();
   if(!ZOOM) return; var sel=d3.select("#mapbox"), id=++FLY; WT=null;
   if(now||reduced()){ sel.interrupt().call(ZOOM.transform,t); $("mapbox").classList.remove("flying"); declutter(); if(done) done(); return; }
   var sz=mapSize(), a=MP.t, c0=a.invert([sz[0]/2,sz[1]/2]), c1=t.invert([sz[0]/2,sz[1]/2]);
@@ -1834,7 +1851,13 @@ function buildLayers(){
 var LT=null, LTT=0;
 /* The land layer reaches a quarter of a screen beyond each edge, so small moves never show its edges; larger ones redraw it. */
 var LM=.25;
-function landSet(t){ var sz=mapSize(); $("mW").setAttribute("transform","translate("+(t.x+LM*sz[0]).toFixed(2)+","+(t.y+LM*sz[1]).toFixed(2)+") scale("+t.k.toFixed(5)+")"); $("mSvg").style.transform=""; LT=t; LTS=Date.now(); }
+function landSet(t){ var sz=mapSize(); $("mW").setAttribute("transform","translate("+(t.x+LM*sz[0]).toFixed(2)+","+(t.y+LM*sz[1]).toFixed(2)+") scale("+t.k.toFixed(5)+")"); $("mSvg").style.transform=""; LT=t; LTS=Date.now(); landCull(t,sz); }
+/* Zoomed in, the whole world's coastline would be redrawn for every view, which is slow; only the countries in or near view are drawn then, outlined in the coast colour. */
+function landCull(t,sz){ var full=t.k<=MP.kWorld*3||!CTRY.length, L=$("mLand"), B=$("mBord"), C=$("mLandC"); if(!C) return;
+  if(full){ if(C._on){ C._on=false; C.setAttribute("d",""); L.style.display=""; B.style.display=""; } return; }
+  var x0=(-LM*sz[0]-t.x)/t.k, y0=(-LM*sz[1]-t.y)/t.k, x1=((1+LM)*sz[0]-t.x)/t.k, y1=((1+LM)*sz[1]-t.y)/t.k, d="";
+  CTRY.forEach(function(c){ var b=ctryBox(c.n); if(b&&b[2]>=x0&&b[0]<=x1&&b[3]>=y0&&b[1]<=y1) d+=c.d; });
+  if(C._d!==d){ C._d=d; C.setAttribute("d",d); } if(!C._on){ C._on=true; L.style.display="none"; B.style.display="none"; } }
 var LTS=0;
 function landMove(t){
   if(!LT){ landSet(t); return; }
@@ -1844,12 +1867,18 @@ function landMove(t){
   else $("mSvg").style.transform="translate("+tx.toFixed(2)+"px,"+ty.toFixed(2)+"px) scale("+s.toFixed(5)+")";
   clearTimeout(LTT); LTT=setTimeout(function(){ if(MP.t) landSet(MP.t); },140);
 }
+/* Zoomed in, a link can run far beyond the screen; drawing all of it, dashes included, is slow. Only the visible stretch of the same curve is drawn. */
+function visQuad(s){ var sz=mapSize(), m=60, W=sz[0]+m, H=sz[1]+m, N=400, u0=-1, u1=-1;
+  for(var i=0;i<=N;i++){ var u=i/N, p=bez(s,u); if(p[0]>-m&&p[1]>-m&&p[0]<W&&p[1]<H){ if(u0<0) u0=u; u1=u; } }
+  if(u0<0) return null; u0=Math.max(0,u0-1/N); u1=Math.min(1,u1+1/N);
+  var b=function(x,y){ return [(1-x)*(1-y)*s[0][0]+((1-x)*y+x*(1-y))*s[1][0]+x*y*s[2][0],(1-x)*(1-y)*s[0][1]+((1-x)*y+x*(1-y))*s[1][1]+x*y*s[2][1]]; };
+  return [b(u0,u0),b(u0,u1),b(u1,u1)]; }
 function place(){
   var t=MP.t; if(!t) return;
   landMove(t);
   if(MP.tk!==t.k){ MP.tk=t.k; sizeTints(); }
   ARCS.forEach(function(a){ var s=a.sc=arcPts(a.a,a.b,t), l=0, prev=s[0]; for(var i=1;i<=8;i++){ var q=bez(s,i/8); l+=Math.hypot(q[0]-prev[0],q[1]-prev[1]); prev=q; } a.len=Math.max(1,l);
-    var d="M"+s[0][0].toFixed(1)+" "+s[0][1].toFixed(1)+"Q"+s[1][0].toFixed(1)+" "+s[1][1].toFixed(1)+" "+s[2][0].toFixed(1)+" "+s[2][1].toFixed(1); if(a.line){ a.line.setAttribute("d",d); a.halo.setAttribute("d",d); } });
+    var c=a.len>2500?visQuad(s):s, d=c?"M"+c[0][0].toFixed(1)+" "+c[0][1].toFixed(1)+"Q"+c[1][0].toFixed(1)+" "+c[1][1].toFixed(1)+" "+c[2][0].toFixed(1)+" "+c[2][1].toFixed(1):"M0 0"; if(a.line){ a.line.setAttribute("d",d); a.halo.setAttribute("d",d); } });
   SITES.forEach(function(o){ o.p=t.apply(xy(SBY[o.id])); if(o.el) o.el.setAttribute("transform","translate("+o.p[0].toFixed(1)+","+o.p[1].toFixed(1)+")"); });
   Array.prototype.forEach.call($("mLabels").children,function(el){ var o=SITEBY[el.getAttribute("data-s")]; if(o&&o.p) el.style.transform="translate("+o.p[0].toFixed(1)+"px,"+o.p[1].toFixed(1)+"px)"; });
   regPlace(); coPlace();
@@ -1928,7 +1957,8 @@ function frame(now){
 function sizeCanvas(){ var sz=mapSize(); DPR=1; /* soft glows lose nothing at standard resolution, and it quarters the pixels handed to the compositor each frame */ FV.width=Math.round(sz[0]*DPR); FV.height=Math.round(sz[1]*DPR); FV.style.width=sz[0]+"px"; FV.style.height=sz[1]+"px"; FXR=[]; }
 /* The moving layer: light travelling along the links, more and brighter on the open run, and the pulse of its sites. */
 function drawFx(now){
-  var sel=!!MP.drawn, nr=[], mark=function(x,y,r){ nr.push([x-r-1,y-r-1,2*r+2]); };
+  /* Only what falls on the canvas is drawn: zoomed in, a link's lights can sit hundreds of thousands of pixels away, and drawing them there is slow. */
+  var sel=!!MP.drawn, nr=[], cw=FV.width/DPR, ch=FV.height/DPR, inView=function(x,y,r){ return x>-r&&y>-r&&x<cw+r&&y<ch+r; }, mark=function(x,y,r){ nr.push([x-r-1,y-r-1,2*r+2]); };
   FX.setTransform(DPR,0,0,DPR,0,0);
   FXR.forEach(function(q){ FX.clearRect(q[0],q[1],q[2],q[2]); });
   ARCS.forEach(function(a){
@@ -1937,11 +1967,11 @@ function drawFx(now){
     if(sel&&!on) return;
     for(var j=0;j<n;j++){
       var u=(base+j/n)%1, fade=Math.min(1,u*8,(1-u)*8);
-      for(var q=0;q<tail;q++){ var uu=u-q*(step/a.len); if(uu<0) break; var pt=bez(a.sc,uu), z=sz*(1-q*(on?.13:.2)); FX.globalAlpha=Math.max(.6,a.al)*(on?1:.65)*(1-q*(on?.16:.32))*fade; FX.drawImage(img,pt[0]-z/2,pt[1]-z/2,z,z); mark(pt[0],pt[1],z/2); }
+      for(var q=0;q<tail;q++){ var uu=u-q*(step/a.len); if(uu<0) break; var pt=bez(a.sc,uu), z=sz*(1-q*(on?.13:.2)); if(!inView(pt[0],pt[1],z)) continue; FX.globalAlpha=Math.max(.6,a.al)*(on?1:.65)*(1-q*(on?.16:.32))*fade; FX.drawImage(img,pt[0]-z/2,pt[1]-z/2,z,z); mark(pt[0],pt[1],z/2); }
     }
   });
   SITES.forEach(function(o){
-    if(!o.on||o.al<.05||!o.p) return;
+    if(!o.on||o.al<.05||!o.p||!inView(o.p[0],o.p[1],30)) return;
     var col=o.kOn>=0?KC[o.kOn]:DOT, ph=(now/2400+o.seed)%1; if(o.kOn===3) col=INK;
     FX.globalAlpha=(1-ph)*.7; FX.strokeStyle=col; FX.lineWidth=2; FX.beginPath(); FX.arc(o.p[0],o.p[1],8+ph*20,0,6.2832); FX.stroke(); mark(o.p[0],o.p[1],30);
   });
@@ -2062,7 +2092,10 @@ function buildMap(){
   ZOOM=d3.zoom().clickDistance(6).tapDistance(12).scaleExtent([MP.kWorld*.85,MP.kWorld*140]).translateExtent([[-300,-220],[1300,740]])
     /* Presses on the map's own controls never start a pan, which would also swallow the next click elsewhere. */
     .filter(function(e){ return e.type!=="wheel"&&!e.button&&!(e.target&&e.target.closest&&e.target.closest(".mjur,.mregs,.mzoom,.mchoose,.mtop,.mpills,.mco")); })
-    .on("zoom",function(e){ MP.t=e.transform; if(e.sourceEvent&&MP.reg){ MP.reg=""; regChips(); } if(e.sourceEvent){ WT=null; chooser(null); } place(); }).on("end",declutter);
+    .on("start",function(e){ if(!e.sourceEvent) return; glideStop(); GL.s=[]; GL.pinch=false; GL.k=e.transform.k; stillFx(true); })
+    .on("zoom",function(e){ MP.t=e.transform; if(e.sourceEvent&&MP.reg){ MP.reg=""; regChips(); } if(e.sourceEvent){ WT=null; chooser(null);
+      var se=e.sourceEvent; if((se.touches&&se.touches.length>1)||Math.abs(e.transform.k-GL.k)>1e-9) GL.pinch=true; GL.s.push([performance.now(),e.transform.x,e.transform.y]); if(GL.s.length>6) GL.s.shift(); } place(); })
+    .on("end",function(e){ if(e.sourceEvent) GL.ends=(GL.ends||0)+1; if(GL.raf) return; if(e.sourceEvent&&!GL.pinch&&!reduced()){ var now=performance.now(), s=GL.s.filter(function(p){ return now-p[0]<160; }); GL.gap=GL.s.length?now-GL.s[GL.s.length-1][0]:-1; if(s.length>1){ var a=s[0], b=s[s.length-1], dt=b[0]-a[0]; if(now-b[0]<120&&dt>0){ var vx=(b[1]-a[1])/dt, vy=(b[2]-a[2])/dt, sp=Math.hypot(vx,vy); if(sp>.3){ if(sp>6){ vx*=6/sp; vy*=6/sp; } glideFrom(vx,vy); return; } } } } declutter(); stillFx(false); });
   d3.select("#mapbox").call(ZOOM);
   $("mapbox").addEventListener("wheel",wheel,{passive:false});
   MP.t=fitT(boxOf(MREG.world)); d3.select("#mapbox").call(ZOOM.transform,MP.t);
@@ -2387,20 +2420,21 @@ function play(){
      The link or site under the finger lights up while it is pressed. */
   var tp=null, pressT=0, mbox=$("mapbox"), skip=function(e){ return e.target.closest(".mregs,.mzoom,.mchoose,.mtop,.mpills,.mjur,.mco"); };
   mbox.addEventListener("pointerdown",function(e){
+    if(GL.raf){ glideStop(); }
     if(!e.isPrimary){ tp=null; return; } if(skip(e)||e.button>0){ tp=null; return; }
     var b=mbox.getBoundingClientRect(); tp={x:e.clientX,y:e.clientY,t:Date.now(),moved:false};
     if(e.pointerType!=="mouse"&&MP.built&&MP.layer==="runs"){ var x=e.clientX-b.left, y=e.clientY-b.top, l=linksNear(x,y,18), d=hitAt(x,y).dot; clearTimeout(pressT); if(l.length&&!(d&&d.d<=l[0].d+4&&d.d<=20)) setHover(l[0].run); }
   },{passive:true});
   mbox.addEventListener("pointermove",function(e){ if(tp&&e.isPrimary&&Math.hypot(e.clientX-tp.x,e.clientY-tp.y)>12){ tp.moved=true; setHover(""); } },{passive:true});
   mbox.addEventListener("pointerup",function(e){ var t=tp; tp=null; pressT=setTimeout(function(){ if(MP.touch) setHover(""); },220);
-    if(!t||!e.isPrimary||t.moved||Date.now()-t.t>650||!MP.built||skip(e)) return;
+    if(!t||!e.isPrimary||t.moved||Date.now()-t.t>650||!MP.built||skip(e)||Date.now()-GL.stopAt<450) return;
     var b=mbox.getBoundingClientRect(); MP.tapAt=Date.now(); mapTap(e.clientX-b.left,e.clientY-b.top); });
   mbox.addEventListener("pointercancel",function(){ tp=null; setHover(""); });
   v.addEventListener("click",function(e){
     var t=e.target.closest("[data-mfopen],[data-mfclose],[data-mfclear],[data-mpx],[data-mlayer],[data-mjur],[data-mregs],[data-mev],[data-msite],[data-mfocus],[data-mpick],[data-mreg],[data-mdesel],[data-mstep],[data-mlist],[data-mf2],[data-mkind],[data-mmore],[data-mzoom],[data-mplay],[data-myears],[data-y],[data-mqclear],[data-mctryx],[data-mshare],[data-mcmp],[data-mcmpx],[data-mswap],[data-mco],[data-mcogo],[data-mcocl],[data-mcorun],[data-mcoall],[data-mcot],#mGrab");
     if(!t||(t.hasAttribute("data-msite")&&e.detail)){
       /* A pointer tap on the map: resolved by distance. A keyboard press on a site button falls through to the site. */
-      if(e.target.closest("#mapbox")&&!e.target.closest(".mregs,.mzoom,.mchoose,.mtop,.mpills,.mjur,.mco")&&MP.built&&Date.now()-(MP.tapAt||0)>700){ var b=$("mapbox").getBoundingClientRect(); mapTap(e.clientX-b.left,e.clientY-b.top); }
+      if(e.target.closest("#mapbox")&&!e.target.closest(".mregs,.mzoom,.mchoose,.mtop,.mpills,.mjur,.mco")&&MP.built&&Date.now()-(MP.tapAt||0)>700&&Date.now()-GL.stopAt>450){ var b=$("mapbox").getBoundingClientRect(); mapTap(e.clientX-b.left,e.clientY-b.top); }
       return;
     }
     if(t.hasAttribute("data-mfopen")){ openFilters(); return; }
@@ -2535,7 +2569,7 @@ function play(){
 /* Read-only state for the browser tests. */
 window.__pmapT=function(){ return MP.t; };
 window.__pmapL=function(x,y,R){ return linksNear(x,y,R); }; window.__pmapC=function(n){ setCountry(n); }; window.__pmapS=function(){ return SITES.map(function(o){ return [o.id,ctryOf(o.id)]; }); }; window.__pmapH=function(x,y){ var h=hitAt(x,y); return {arc:h.arc,ad:h.ad,dot:h.dot,dots:h.dots.slice(0,6)}; };
-window.__pmap={state:function(){ return {layer:MP.layer,coSel:MP.coSel,coMarks:$("mCoLab")?$("mCoLab").children.length:0,run:MP.run,cmp:MP.cmp||null,detent:MP.detent,k:MP.t&&MP.t.k,kWorld:MP.kWorld,arcsOn:ARCS.filter(function(a){return a.on;}).length,sitesVis:SITES.filter(function(o){return o.vis;}).length,sites:SITES.map(function(o){return {id:o.id,p:o.p,vis:o.vis,on:o.on};}),arcs:ARCS.map(function(a){return {run:a.run,sc:a.sc,vis:a.vis,on:a.on,prog:a.prog};})}; }};
+window.__pmap={gl:function(){ return {ends:GL.ends||0,gap:GL.gap,raf:GL.raf,s:GL.s.length,pinch:GL.pinch,stopAt:GL.stopAt}; },state:function(){ return {gliding:!!GL.raf,tx:MP.t&&MP.t.x,ty:MP.t&&MP.t.y,layer:MP.layer,coSel:MP.coSel,coMarks:$("mCoLab")?$("mCoLab").children.length:0,run:MP.run,cmp:MP.cmp||null,detent:MP.detent,k:MP.t&&MP.t.k,kWorld:MP.kWorld,arcsOn:ARCS.filter(function(a){return a.on;}).length,sitesVis:SITES.filter(function(o){return o.vis;}).length,sites:SITES.map(function(o){return {id:o.id,p:o.p,vis:o.vis,on:o.on};}),arcs:ARCS.map(function(a){return {run:a.run,sc:a.sc,vis:a.vis,on:a.on,prog:a.prog};})}; }};
 
 /* ---------- trends ---------- */
 /* Headline tiles, two scatters with fitted trends, runs per year and leaderboards, all linked: a selection or a highlighted year carries across them.
