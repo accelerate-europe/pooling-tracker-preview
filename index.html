@@ -857,6 +857,8 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
 .tile[aria-expanded="true"]{box-shadow:0 0 0 1.5px var(--ink)}
 .bpeek .tcard-f,#trTilePick .tcard-f{font-weight:600}
 
+#v-trends{overflow-anchor:none}
+
 @media (hover:hover){
   .tabs a:hover{background:var(--line2);color:var(--ink)}
   .tabs a[aria-current="page"]:hover{background:var(--accent-soft)}
@@ -1061,9 +1063,9 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
           </div>
           <div class="mkinds tr-kinds" id="trKinds" role="group" aria-label="Coordination"></div>
           <div class="tcar" id="trCar"><div class="tcar-track">
-          <section class="card tchart"><div class="chart-h"><h2>Model size of each run</h2><span class="n" id="tSizeN"></span><span class="tleg" aria-hidden="true"><i></i>Demonstrated<i class="h"></i>Indicative</span></div><p class="tfit-note" id="tSizeFit"></p><div class="tplot" id="tSize"></div><div class="tpick" id="tSizePick"></div></section>
-          <section class="card tchart"><div class="chart-h"><h2>Efficiency across distance</h2><span class="n" id="tEffN"></span><span class="tleg" aria-hidden="true"><i></i>Demonstrated<i class="h"></i>Indicative</span></div><p class="tfit-note" id="tEffFit"></p><div class="tplot" id="tEff"></div><div class="tpick" id="tEffPick"></div></section>
-          <section class="card tchart"><div class="chart-h"><h2>Runs per year</h2></div><div class="tplot tyears" id="tYears"></div></section>
+          <section class="card tchart"><div class="chart-h"><h2>Model Size</h2><span class="n" id="tSizeN"></span><span class="tleg" aria-hidden="true"><i></i>Demonstrated<i class="h"></i>Indicative</span></div><p class="tfit-note" id="tSizeFit"></p><div class="tplot" id="tSize"></div><div class="tpick" id="tSizePick"></div></section>
+          <section class="card tchart"><div class="chart-h"><h2>Efficiency Across Distance</h2><span class="n" id="tEffN"></span><span class="tleg" aria-hidden="true"><i></i>Demonstrated<i class="h"></i>Indicative</span></div><p class="tfit-note" id="tEffFit"></p><div class="tplot" id="tEff"></div><div class="tpick" id="tEffPick"></div></section>
+          <section class="card tchart"><div class="chart-h"><h2>Runs per Year</h2></div><div class="tplot tyears" id="tYears"></div></section>
           </div><div class="tcar-nav"><button type="button" class="tcar-arr" data-car="-1" aria-label="Previous"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><span class="tcar-dots"></span><button type="button" class="tcar-arr" data-car="1" aria-label="Next"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button></div></div>
           <h2 class="h2" id="recsH">Records</h2>
           <div class="tcar tcar-b" id="recCar"><div class="tcar-track boards" id="recs"></div><div class="tcar-nav"><button type="button" class="tcar-arr" data-car="-1" aria-label="Previous"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><span class="tcar-dots"></span><button type="button" class="tcar-arr" data-car="1" aria-label="Next"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button></div></div>
@@ -2615,7 +2617,7 @@ function trTiles(){
   if(own) T.push({v:own.owners,f:function(v){return fmtN(Math.round(v));},l:"Most owners in one run",run:own});
   var el=$("trTiles"), pk=$("trTilePick"), pid=pk&&pk.getAttribute("data-id");
   if(pid&&!T.some(function(t){return t.run&&t.run.id===pid;})) tilePeek(null);
-  el.innerHTML=T.map(function(t,i){ return '<button type="button" class="tile"'+(t.run?' data-trun="'+esc(t.run.id)+'" aria-expanded="'+(t.run.id===pid)+'"':' disabled')+'><b class="n" data-i="'+i+'">'+t.f(t.v)+'</b><span>'+t.l+'</span>'+(t.run?'<small>'+esc(t.run.name)+(demo(t.run)?'':' · Indicative')+'</small>':'')+'</button>'; }).join("");
+  el.innerHTML=T.map(function(t,i){ return '<button type="button" class="tile"'+(t.run?' data-trun="'+esc(t.run.id)+'" aria-expanded="'+(t.run.id===pid)+'"':' disabled')+'><b class="n" data-i="'+i+'">'+t.f(t.v)+'</b><span>'+t.l+'</span>'+'</button>'; }).join("");
   if(TR.seen) return; TR.seen=true;
   var t0=performance.now(), bs=el.querySelectorAll("b[data-i]");
   var step=function(now){ var p=Math.min(1,(now-t0)/1100), e=ease(p); Array.prototype.forEach.call(bs,function(b){ var t=T[+b.getAttribute("data-i")], v=t.v<10?t.v*e:Math.exp(Math.log(Math.max(1,t.v))*e); b.textContent=t.f(p<1?v:t.v); }); if(p<1) requestAnimationFrame(step); };
@@ -2725,8 +2727,8 @@ function trSizeChart(list){
     tipVal:function(p){ return fmtParams(p.y)+" parameters · "+fmtDate(trRun(p.id)); },
     fit:function(ps){ var f=ols(ps.filter(function(p){return p.solid;}).map(function(p){return [p.x,Math.log10(p.y)];})); if(!f) return null; var months=f.b>0?12*Math.log10(2)/f.b:0;
       var t0=Math.floor(d3.max(ps,function(p){return p.solid?p.x:-1/0;})), A=Math.pow(10,f.a+f.b*t0), g=Math.pow(10,f.b);
-      return {at:function(x){ return Math.pow(10,f.a+f.b*x); },label:"Fitted on "+f.n+" real runs: "+(f.b>0?"size doubles every "+(months<18?Math.round(months)+" months":(months/12).toFixed(1)+" years"):"no growth in size"),
-        tip:'<b>Fitted on '+f.n+' real runs</b><span class="n">y = '+cf(A)+' × '+cf(g)+'<sup>t\u2009\u2212\u2009'+t0+'</sup></span><span class="n">'+r2(f)+' on the log scale</span><small>y in billions of parameters, t in years</small>'}; }});
+      return {at:function(x){ return Math.pow(10,f.a+f.b*x); },label:f.b>0?"Size doubles every "+(months<18?Math.round(months)+" months":(months/12).toFixed(1)+" years"):"No growth in size",
+        tip:'<b>Trend of demonstrated runs</b><span class="n">y = '+cf(A)+' × '+cf(g)+'<sup>t\u2009\u2212\u2009'+t0+'</sup></span><span class="n">'+r2(f)+' on the log scale</span><small>y in billions of parameters, t in years</small>'}; }});
 }
 function trEffChart(list){
   var pts=list.filter(function(r){return r.dist&&r.eff;}).map(function(r){ return {id:r.id,x:r.dist,y:r.eff,k:r.k,solid:r.ev==="real",name:r.name}; });
@@ -2737,8 +2739,8 @@ function trEffChart(list){
   scatterChart($("tEff"),{label:"Efficiency each source states, by link distance",ytitle:"Efficiency against the same run at one site",xtitle:"Link distance as each source gives it, km, log scale",points:pts,xlog:true,xdom:[lo,hi],xfmt:function(v){ var l=Math.log10(v); return Math.abs(l-Math.round(l))<1e-6?fmtN(v)+(v===hi?" km":""):""; },ydom:[ymin,100],yfmt:function(v){return v+"%";},left:44,
     tipVal:function(p){ return fmtN(Math.round(p.x))+" km · "+sig4(p.y)+"%"; },
     fit:function(ps){ var f=ps.length>=5?ols(ps.map(function(p){return [Math.log10(p.x),p.y];})):null; if(!f) return null; var pts=Math.abs(f.b), u=pts.toFixed(1)==="1.0"?"point":"points";
-      return {at:function(x){ return f.a+f.b*Math.log10(x); },label:"Fitted on "+f.n+" runs: "+pts.toFixed(1)+" "+u+" "+(f.b<0?"lost":"gained")+" per tenfold distance"+(f.r2<.3?", a weak fit":""),
-        tip:'<b>Fitted on '+f.n+' runs</b><span class="n">y = '+cf(f.a)+(f.b<0?' \u2212 ':' + ')+cf(pts)+' log<sub>10</sub> x</span><span class="n">'+r2(f)+'</span><small>y in per cent, x in km</small>'}; }});
+      return {at:function(x){ return f.a+f.b*Math.log10(x); },label:pts.toFixed(1)+" "+u+" "+(f.b<0?"lost":"gained")+" per tenfold distance"+(f.r2<.3?", a weak fit":""),
+        tip:'<b>Trend</b><span class="n">y = '+cf(f.a)+(f.b<0?' \u2212 ':' + ')+cf(pts)+' log<sub>10</sub> x</span><span class="n">'+r2(f)+'</span><small>y in per cent, x in km</small>'}; }});
 }
 /* Runs per year, stacked by coordination; a year under the pointer lights up its runs in the charts above. */
 function trYears(list){
@@ -2775,7 +2777,7 @@ function trYear(v,c,rows,x,stick){
 /* Leaderboards: bars grow to their share of the leader. */
 function trBoards(){
   var real=trList().filter(function(r){return r.k!==3;});
-  var defs=[{t:"Largest models",u:"Parameters",f:"params",v:fmtParams,s:""},{t:"Longest links",u:"Link distance in kilometres, as each source gives it",f:"dist",v:function(v){return fmtN(Math.round(v));},s:"km"},{t:"Most owners",u:"Organisations or people contributing",f:"owners",v:fmtN,s:""},{t:"Most nodes",u:"Machines or devices taking part, as each source counts them",f:"nodes",v:fmtN,s:""},{t:"Most accelerators",u:"GPUs, TPUs and other AI chips, with the type each source names",f:"gpus",v:fmtN,s:"chips",sub:function(r){ return r.chips?r.chips.charAt(0).toUpperCase()+r.chips.slice(1):"Chip type not stated"; }}];
+  var defs=[{t:"Largest Models",u:"Parameters",f:"params",v:fmtParams,s:""},{t:"Longest Links",u:"Link distance in km",f:"dist",v:function(v){return fmtN(Math.round(v));},s:"km"},{t:"Most Owners",u:"Organisations or people contributing",f:"owners",v:fmtN,s:""},{t:"Most Nodes",u:"Machines or devices taking part",f:"nodes",v:fmtN,s:""},{t:"Most Accelerators",u:"Number of chips",f:"gpus",v:fmtN,s:"chips",sub:function(r){ return r.chips?r.chips.charAt(0).toUpperCase()+r.chips.slice(1):"Chip type not stated"; }}];
   var el=$("recs"), h="";
   defs.forEach(function(d){
     var top=real.filter(function(r){return r[d.f];}).sort(function(a,b){return b[d.f]-a[d.f];}).slice(0,5); if(!top.length) return;
@@ -2850,8 +2852,8 @@ function carSync(car){
   Array.prototype.forEach.call(dots.children,function(b,j){ b.setAttribute("aria-current",String(j===i2)); });
   var arr=car.querySelectorAll(".tcar-arr"); arr[0].disabled=i2<=0; arr[1].disabled=i2>=pages-1; car.querySelector(".tcar-nav").hidden=pages<2;
   car._step=step; car._pages=pages; car._i=i2;
-  /* The track takes the height of the cards in view, so a short card leaves no gap. */
-  var hmax=0; for(var j=i2;j<Math.min(n,i2+per);j++) hmax=Math.max(hmax,tr.children[j].offsetHeight); if(hmax) tr.style.height=(hmax+4)+"px";
+  /* The track holds the height of its tallest card, so moving between cards never shifts the page below. */
+  var hmax=0; for(var j=0;j<n;j++) hmax=Math.max(hmax,tr.children[j].offsetHeight); if(hmax) tr.style.height=(hmax+4)+"px";
 }
 function carGo(car,i){ var tr=car.querySelector(".tcar-track"); i=Math.max(0,Math.min(car._pages-1,i)); tr.scrollTo({left:i*car._step,behavior:"smooth"}); }
 (function(){
@@ -3009,8 +3011,6 @@ function conBody(c){
   if(runs.length) h+='<p class="kx"><span>Runs</span>'+(c.k>=0?runs.slice(0,8):runs).map(function(r){ return '<button type="button" class="kchip" data-run="'+esc(r.id)+'">'+esc(r.name)+'</button>'; }).join("")+(c.k>=0&&runs.length>8?'<button type="button" class="link" data-kbconruns="'+esc(c.id)+'">All '+runs.length+'</button>':"")+'</p>';
   var rules=c.rules.map(function(id){ return S.rules.filter(function(r){return r.id===id;})[0]; }).filter(Boolean);
   if(rules.length) h+='<p class="kx"><span>Regulation</span>'+rules.map(function(r){ return '<button type="button" class="kchip" data-kbrule="'+esc(r.id)+'">'+esc(r.short||r.title)+'</button>'; }).join("")+'</p>';
-  var rel=c.related.map(conBy).filter(Boolean);
-  if(rel.length) h+='<p class="kx"><span>See also</span>'+rel.map(function(x){ return '<button type="button" class="kchip" data-kbcon="'+esc(x.id)+'">'+esc(x.term)+'</button>'; }).join("")+'</p>';
   return h+(c.note?'<p class="quiet">'+esc(c.note)+'</p>':"")+sourcesHtml(c);
 }
 function renderNews(){
