@@ -909,6 +909,8 @@ a.est:hover span{color:var(--ink);background:var(--line2)}
 .mcocard:active{background:var(--sunk)}
 @media (hover:hover){.mcocard:hover{box-shadow:inset 0 0 0 1px var(--ink3)}}
 
+.bfoot{display:flex;justify-content:center;gap:6px;padding:2px 0 6px}.bfoot .btop{margin:0}
+
 @media (hover:hover){
   .tabs a:hover{background:var(--line2);color:var(--ink)}
   .tabs a[aria-current="page"]:hover{background:var(--accent-soft)}
@@ -2911,29 +2913,24 @@ function trBoards(){
   defs.forEach(function(d){
     var key=d.acc?"acc":d.f; TR.bd=TR.bd||{}; var n=TR.bn[key]||5, all=real.filter(function(r){return r[d.f];}).sort(function(a,b){return b[d.f]-a[d.f];}), top=all.slice(0,n); TR.bd[key]={d:d,all:all,max:all.length?all[0][d.f]:1}; if(!top.length&&!d.acc) return;
     var max=top.length?top[0][d.f]:1;
-    h+='<section class="board"><header><h3>'+d.t+'</h3><p>'+d.u+(d.est?' '+estLink(d.est):'')+'</p>'+(d.acc?'<span class="segc bsw" role="group" aria-label="Count"><button type="button" data-trh100="0" aria-pressed="'+!TR.h100+'">Chips</button><button type="button" data-trh100="1" aria-pressed="'+TR.h100+'">H100-eq.</button></span>':'')+'</header><ol>'+top.map(function(r,i){ return bRow(d,r,i,max); }).join("")+'</ol>'+(all.length>n?'<div class="bmore" data-bmore="'+key+'" aria-hidden="true"></div>':'')+(n>5?'<button type="button" class="btop" data-btop="'+key+'">Top 5</button>':'')+""+'</section>';
+    h+='<section class="board"><header><h3>'+d.t+'</h3><p>'+d.u+(d.est?' '+estLink(d.est):'')+'</p>'+(d.acc?'<span class="segc bsw" role="group" aria-label="Count"><button type="button" data-trh100="0" aria-pressed="'+!TR.h100+'">Chips</button><button type="button" data-trh100="1" aria-pressed="'+TR.h100+'">H100-eq.</button></span>':'')+'</header><ol>'+top.map(function(r,i){ return bRow(d,r,i,max); }).join("")+'</ol>'+bFoot(key,n,all.length)+""+'</section>';
   });
   var keep=TR.bkeep, sl=el.scrollLeft; TR.bkeep=false;
   el.innerHTML=h; if(keep) el.scrollLeft=sl; $("recsH").hidden=!h;
   if(!keep){ el.classList.remove("grown"); requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.classList.add("grown"); }); }); }
   bWatch();
 }
+/* Under each board: Show more adds five rows, Top 5 folds it back. */
+function bFoot(key,n,len){ return (len>n||n>5)?'<div class="bfoot">'+(len>n?'<button type="button" class="btop" data-bmore="'+key+'">Show more</button>':'')+(n>5?'<button type="button" class="btop" data-btop="'+key+'">Top 5</button>':'')+'</div>':''; }
 function bRow(d,r,i,max){ return '<li><button type="button" class="brow" data-trun="'+esc(r.id)+'" style="--c:'+kcol(r.k)+';--w:'+Math.max(.015,r[d.f]/max).toFixed(3)+'"><span class="brk n">'+(i+1)+'</span><span class="bname"><b>'+esc(r.name)+'</b><small>'+esc((d.sub?d.sub(r):r.org)+(demo(r)?"":" · Indicative"))+'</small></span><span class="bval n">'+d.v(r[d.f])+(d.s?'<small>'+d.s+'</small>':'')+'</span><i></i></button></li>'; }
 /* Five more rows go on the end of the board, leaving the rows already there in place. */
-function bGrow(key,sent){
-  var B=TR.bd&&TR.bd[key]; if(!B) return; var n=TR.bn[key]||5, m=Math.min(B.all.length,n+5), ol=sent.parentNode.querySelector("ol"), h="";
+function bGrow(key,btn){
+  var B=TR.bd&&TR.bd[key]; if(!B) return; var sec=btn.closest(".board"), n=TR.bn[key]||5, m=Math.min(B.all.length,n+5), ol=sec.querySelector("ol"), h="";
   for(var i=n;i<m;i++) h+=bRow(B.d,B.all[i],i,B.max);
   ol.insertAdjacentHTML("beforeend",h); TR.bn[key]=m;
-  if(m>=B.all.length) sent.remove();
-  if(!sent.parentNode.querySelector("[data-btop]")) sent.insertAdjacentHTML("afterend",'<button type="button" class="btop" data-btop="'+key+'">Top 5</button>');
+  var f=sec.querySelector(".bfoot"); f.outerHTML=bFoot(key,m,B.all.length);
 }
-/* A board grows by five rows each time its end comes into view, until every run with that figure is listed. */
-function bWatch(){
-  if(!window.IntersectionObserver) return;
-  if(TR.bio) TR.bio.disconnect();
-  TR.bio=new IntersectionObserver(function(es){ es.forEach(function(e){ if(!e.isIntersecting) return; var tg=e.target; (function go(){ if(TR.touching||Date.now()-(TR.touchEnd||0)<900){ setTimeout(go,300); return; } if(tg.isConnected) bGrow(tg.getAttribute("data-bmore"),tg); })(); }); },{root:$("v-trends"),rootMargin:"0px 0px 40px 0px"});
-  Array.prototype.forEach.call(document.querySelectorAll("#recs [data-bmore]"),function(s){ TR.bio.observe(s); });
-}
+function bWatch(){}
 function trZoomReset(){ TR.zx=null; var c=$("tSize")._c; if(c&&c.zm) c.svg.call(c.zm.transform,d3.zoomIdentity); trSizeChart(trList()); }
 /* The pinned run: a card under each chart that holds it, with the way to the map and to the full record. */
 function trCard(r){
@@ -2989,11 +2986,12 @@ function renderTrends(){
 (function(){
   $("v-trends").addEventListener("click",function(e){
     var nt=e.target.closest(".tfit-note.on"); if(nt&&nt._c){ var c=nt._c, P=c.fitPx; if(P&&P.length){ var q=P[Math.max(0,P.length-3)]; var on=!!c.fpin; fitTip(c,on?null:q,!on); } return; }
-    var cx=e.target.closest("[data-trscale],[data-trfront],[data-trzoomx],[data-trh100],[data-btop]");
+    var cx=e.target.closest("[data-trscale],[data-trfront],[data-trzoomx],[data-trh100],[data-btop],[data-bmore]");
     if(cx){ if(cx.hasAttribute("data-trscale")){ var sp=cx.getAttribute("data-trscale").split(":"); TR.scale[sp[0]]=sp[1]; Array.prototype.forEach.call(document.querySelectorAll('[data-trscale^="'+sp[0]+':"]'),function(b){ b.setAttribute("aria-pressed",String(b===cx)); }); if(sp[0]==="size") trSizeChart(trList()); else if(sp[0]==="eff") trEffChart(trList()); else trBwChart(trList()); }
       else if(cx.hasAttribute("data-trfront")){ TR.front=!TR.front; TR.zx=null; trSizeChart(trList()); }
       else if(cx.hasAttribute("data-trzoomx")) trZoomReset();
       else if(cx.hasAttribute("data-trh100")){ TR.h100=cx.getAttribute("data-trh100")==="1"; TR.bkeep=true; trBoards(); }
+      else if(cx.hasAttribute("data-bmore")) bGrow(cx.getAttribute("data-bmore"),cx);
       else if(cx.hasAttribute("data-btop")){ TR.bn[cx.getAttribute("data-btop")]=5; TR.bkeep=true; trBoards(); }
       return; }
     var t=e.target.closest("[data-trun],[data-trfig],[data-trk],[data-trmap],[data-trclose],[data-trtclose]"); if(!t) return;
