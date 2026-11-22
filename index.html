@@ -191,7 +191,7 @@ kbd{font:600 11px var(--ui);padding:1px 6px;border-radius:5px;background:var(--l
 @media (max-width:419px){ .ksort span{max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .kfbtn{padding:0 11px} }
 .kfbtn .n{display:none;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--hot);color:#1a1a1a;font-size:12px;font-weight:750;line-height:20px;text-align:center;box-sizing:border-box}
 .kfbtn.on{box-shadow:inset 0 0 0 1.5px var(--ink)}.kfbtn.on .n{display:inline-block}
-.segc.kbseg{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:12px}
+.segc.kbseg{grid-template-columns:repeat(5,minmax(0,1fr));margin-top:12px}
 .segc.kbseg button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:48px;padding:4px 2px;white-space:nowrap;line-height:1.15}
 .segc.kbseg button .n{font-size:12px;font-weight:500;color:var(--ink3);min-height:14px}
 .segc.kbseg button.none{color:var(--ink3)}
@@ -883,6 +883,11 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
 .btop{display:block;margin:4px auto 8px;min-height:36px;padding:0 14px;border-radius:18px;font-size:13px;font-weight:650;color:var(--ink2)}
 .bsrc{margin:6px 12px 8px;font-size:11.5px;line-height:1.4;color:var(--ink3)}.bsrc a{color:inherit}
 
+a.est{display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;margin:-8px 0 -8px 1px;vertical-align:middle;text-decoration:none;font-style:normal;-webkit-tap-highlight-color:transparent}
+a.est span{padding:0 5px;border-radius:5px;background:var(--sunk);color:var(--ink2);font-size:12px;font-weight:650;line-height:1.5}
+a.est:hover span{color:var(--ink);background:var(--line2)}
+.mtab{width:100%;border-collapse:collapse;font-size:13.5px}.mtab th,.mtab td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--line2)}.mtab th{font-weight:600;color:var(--ink3);font-size:12px}
+
 @media (hover:hover){
   .tabs a:hover{background:var(--line2);color:var(--ink)}
   .tabs a[aria-current="page"]:hover{background:var(--accent-soft)}
@@ -1040,7 +1045,7 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
           <label class="kfbtn ksort"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v10M2.5 10.5 5 13l2.5-2.5M11 13V3M8.5 5.5 11 3l2.5 2.5"/></svg><span id="kbSortL">Newest</span><select id="kbSort" aria-label="Sort"></select></label>
           <button type="button" class="kfbtn" id="kbF" data-kbfopen aria-haspopup="dialog"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg><span>Filter</span><span class="n" id="kbFn"></span></button>
         </div>
-        <div class="segc kbseg" id="dbSeg" role="group" aria-label="Section"><button type="button" data-dbs="runs" aria-pressed="true"><span>Runs</span><span class="n" id="kbN-runs"></span></button><button type="button" data-dbs="con" aria-pressed="false"><span>Concepts</span><span class="n" id="kbN-con"></span></button><button type="button" data-dbs="devs" aria-pressed="false"><span>News</span><span class="n" id="kbN-devs"></span></button><button type="button" data-dbs="reg" aria-pressed="false"><span>Regulation</span><span class="n" id="kbN-reg"></span></button></div>
+        <div class="segc kbseg" id="dbSeg" role="group" aria-label="Section"><button type="button" data-dbs="runs" aria-pressed="true"><span>Runs</span><span class="n" id="kbN-runs"></span></button><button type="button" data-dbs="con" aria-pressed="false"><span>Concepts</span><span class="n" id="kbN-con"></span></button><button type="button" data-dbs="devs" aria-pressed="false"><span>News</span><span class="n" id="kbN-devs"></span></button><button type="button" data-dbs="reg" aria-pressed="false"><span>Regulation</span><span class="n" id="kbN-reg"></span></button><button type="button" data-dbs="met" aria-pressed="false"><span>Methods</span><span class="n" id="kbN-met"></span></button></div>
         <div class="kpills" id="kbPills" hidden></div>
         <div id="dbRuns"><div id="runList"></div></div>
         <div id="dbCons" hidden><div id="conList"></div></div>
@@ -1068,6 +1073,7 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
         <div id="watch"></div>
         </div>
         <div id="dbReg" hidden><div id="polList"></div></div>
+        <div id="dbMet" hidden><div id="metList"></div></div>
         <p class="sig">Curated by Rafael Andersson Lipcsey<span>Director of Compute and Security Research, Accelerate Europe</span><span>Record as of 22 November 2026</span></p>
       </div>
       <div class="mfilt" id="kbFilt" hidden><div class="mfpanel" role="dialog" aria-modal="true" aria-labelledby="kbFTitle">
@@ -1088,8 +1094,9 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
           </div>
           <div class="mkinds tr-kinds" id="trKinds" role="group" aria-label="Coordination"></div>
           <div class="tcar" id="trCar"><div class="tcar-track">
-          <section class="card tchart"><div class="chart-h"><h2>Model Size</h2><span class="n" id="tSizeN"></span><span class="tleg" aria-hidden="true"><i></i>Demonstrated<i class="h"></i>Indicative</span></div><div class="tctl"><span class="segc tsc" role="group" aria-label="Scale"><button type="button" data-trscale="size:log" aria-pressed="true">Log</button><button type="button" data-trscale="size:lin" aria-pressed="false">Linear</button></span><button type="button" class="tchip" id="trFront" data-trfront aria-pressed="false" hidden><i class="frd"></i>Frontier</button></div><p class="tfit-note" id="tSizeFit"></p><div class="tplot" id="tSize"></div><div class="tpick" id="tSizePick"></div></section>
+          <section class="card tchart"><div class="chart-h"><h2>Model Size</h2><span class="n" id="tSizeN"></span><span class="tleg" aria-hidden="true"><i></i>Demonstrated<i class="h"></i>Indicative</span></div><div class="tctl"><span class="segc tsc" role="group" aria-label="Scale"><button type="button" data-trscale="size:log" aria-pressed="true">Log</button><button type="button" data-trscale="size:lin" aria-pressed="false">Linear</button></span></div><p class="tfit-note" id="tSizeFit"></p><div class="tplot" id="tSize"></div><div class="tpick" id="tSizePick"></div></section>
           <section class="card tchart"><div class="chart-h"><h2>Efficiency Across Distance</h2><span class="n" id="tEffN"></span><span class="tleg" aria-hidden="true"><i></i>Demonstrated<i class="h"></i>Indicative</span></div><div class="tctl"><span class="segc tsc" role="group" aria-label="Scale"><button type="button" data-trscale="eff:log" aria-pressed="true">Log</button><button type="button" data-trscale="eff:lin" aria-pressed="false">Linear</button></span></div><p class="tfit-note" id="tEffFit"></p><div class="tplot" id="tEff"></div><div class="tpick" id="tEffPick"></div></section>
+          <section class="card tchart"><div class="chart-h"><h2>Model Size per Gbps</h2><span class="n" id="tBwN"></span><span class="tleg" aria-hidden="true"><i></i>Demonstrated<i class="h"></i>Indicative</span></div><div class="tctl"><span class="segc tsc" role="group" aria-label="Scale"><button type="button" data-trscale="bw:log" aria-pressed="true">Log</button><button type="button" data-trscale="bw:lin" aria-pressed="false">Linear</button></span></div><p class="tfit-note" id="tBwFit"></p><div class="tplot" id="tBw"></div><div class="tpick" id="tBwPick"></div></section>
           <section class="card tchart"><div class="chart-h"><h2>Runs per Year</h2></div><div class="tplot tyears" id="tYears"></div></section>
           </div><div class="tcar-nav"><button type="button" class="tcar-arr" data-car="-1" aria-label="Previous"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><span class="tcar-dots"></span><button type="button" class="tcar-arr" data-car="1" aria-label="Next"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button></div></div>
           <h2 class="h2" id="recsH">Records</h2>
@@ -1455,6 +1462,15 @@ function normFig(d){
   var m=METRICS.map(function(x){return x[0];}).indexOf(d.metric);
   return {id:d.id,subject:d.subject,value:d.value,unit:str(d.unit),m:m<0?METRICS.length-1:m,basis:BASIS.indexOf(d.basis)>=0?d.basis:"estimate",date:/^\d{4}-\d{2}-\d{2}$/.test(str(d.date))?d.date:"",prec:str(d.datePrecision),note:str(d.note),self:d.selfReported===true,sources:cleanSources(d.sources)};
 }
+/* Estimates, always marked: chip count times a datasheet figure, for runs on one named chip type whose NVIDIA datasheet was read.
+   Peak dense BF16 or FP16 tensor TFLOPS (half the sparsity figure where only that is given) and maximum board power in watts, SXM where a part comes in several forms. */
+var CHIPS=[[/\bH100\b/i,"H100",989.5,700,"https://www.nvidia.com/en-us/data-center/h100/"],[/\bH200\b/i,"H200",989.5,700,"https://www.nvidia.com/en-us/data-center/h200/"],[/\bA100\b/i,"A100",312,400,"https://www.nvidia.com/en-us/data-center/a100/"],[/\bL40S\b/i,"L40S",362.05,350,"https://www.nvidia.com/en-us/data-center/l40s/"],[/\bL4\b/i,"L4",121,72,"https://www.nvidia.com/en-us/data-center/l4/"],[/\bT4\b/i,"T4",65,70,"https://www.nvidia.com/en-us/data-center/tesla-t4/"]];
+var OTHER=/\b(RTX|GTX|V100|A800|H800|A40|A4000|Ascend|MI\d+|TPU|B200|B300|GB200|GB300|Gaudi|consumer|mixed|heterogeneous)\b/i;
+function chipOf(r){ if(!r.gpus||!r.chips||OTHER.test(r.chips)) return null; var hit=CHIPS.filter(function(c){ return c[0].test(r.chips); }); return hit.length===1?hit[0]:null; }
+function h100eq(r){ var c=chipOf(r); return c?r.gpus*c[2]/989.5:0; }
+function powerW(r){ var c=chipOf(r); return c?r.gpus*c[3]:0; }
+function fmtPower(w){ return w>=1e9?sig4(w/1e9)+" GW":w>=1e6?sig4(+(w/1e6).toFixed(2))+" MW":w>=1e3?fmtN(Math.round(w/1e3))+" kW":Math.round(w)+" W"; }
+function estLink(id){ return '<a class="est" href="#knowledge/methods/'+id+'" aria-label="Estimated. How this is estimated"><span>est.</span></a>'; }
 function sig4(x){ return +x.toPrecision(4); }
 function fmtN(v){
   if(v>=1e15){ var e=Math.floor(Math.log(v)/Math.LN10+1e-9), mnt=sig4(v/Math.pow(10,e)); return (mnt===1?"":mnt+" × ")+"10"+String(e).replace(/\d/g,function(c){return "⁰¹²³⁴⁵⁶⁷⁸⁹".charAt(+c);}); }
@@ -1480,9 +1496,10 @@ function runFacts(r){
   if(r.dist) f.push(["Distance",fmtN(Math.round(r.dist))+" km"+(r.distNote?". "+r.distNote:"")]);
   if(r.link||r.linkNote) f.push(["Link",(r.link?fmtLink(r.link):"")+(r.link&&r.linkNote?". ":"")+r.linkNote]);
   if(r.eff||r.effNote) f.push(["Efficiency",(r.eff?sig4(r.eff)+"%":"")+(r.eff&&r.effNote?". ":"")+r.effNote]);
+  if(powerW(r)) f.push(["Power",esc(fmtPower(powerW(r))+" for the accelerators ")+estLink("power"),1]);
   if(r.days) f.push(["Duration",plural(r.days,"day")]);
   if(r.method) f.push(["Method",r.method.charAt(0).toUpperCase()+r.method.slice(1)]);
-  return f.length?'<dl class="facts">'+f.map(function(x){return '<dt>'+x[0]+'</dt><dd>'+esc(x[1])+'</dd>';}).join("")+'</dl>':"";
+  return f.length?'<dl class="facts">'+f.map(function(x){return '<dt>'+x[0]+'</dt><dd>'+(x[2]?x[1]:esc(x[1]))+'</dd>';}).join("")+'</dl>':"";
 }
 function runBody(r){
   var d=BY[r.dev];
@@ -1713,6 +1730,7 @@ function route(){
   if(v==="map"&&!h[1]&&S.view==="map"&&MP.run&&S.booted) deselect();
   if(v==="map"&&h[1]==="c"){ MP.layer="co"; MP.coSel=h[2]?decodeURIComponent(h[2]):""; MP.run=null; $("v-map").classList.add("co"); $("v-map").classList.remove("reg"); }
   else if(v==="map"&&h[1]){ var hp=h[1].split("+"), id=decodeURIComponent(hp[hp.length-1]); if(hp.length>1) MP.cmp=decodeURIComponent(hp[0]); if(id!==MP.run){ MP.run=id; MP.focus="link"; MP.reg=""; MP.t0=0; MP.arrive=S.view!=="map"&&S.view!==undefined&&!!S.booted; } }
+  if(v==="database"&&h[1]==="methods"&&h[2]){ var mid=decodeURIComponent(h[2]); setTimeout(function(){ openMethod(mid); },60); }
   var changed=v!==S.view; S.view=v;
   $("app").removeAttribute("data-open");
   if(changed) hideToast();
@@ -2193,8 +2211,8 @@ function syncTimeline(){
 function fig(label,v,note){ return '<div class="mcell"><span>'+label+'</span>'+(v?'<b class="n">'+esc(v)+'</b>':'<b class="na">Not given</b>')+(note?'<small>'+esc(note)+'</small>':"")+'</div>'; }
 /* The figures a reader looks for first: model size, accelerators and tokens, as the record states them. */
 function keyFigs(r){
-  var f=[]; if(r.params) f.push([fmtParams(r.params),"parameters"]); if(r.gpus) f.push([fmtN(r.gpus),r.chips?(r.gpus===1?"accelerator, ":"accelerators, ")+r.chips:(r.gpus===1?"accelerator":"accelerators")]); if(r.tokens) f.push([fmtTokens(r.tokens),"training tokens"]);
-  return f.length?'<div class="mkey">'+f.map(function(x){ return '<div><b class="n">'+esc(x[0])+'</b><span>'+esc(x[1])+'</span></div>'; }).join("")+'</div>':"";
+  var f=[]; if(r.params) f.push([fmtParams(r.params),"parameters"]); if(r.gpus) f.push([fmtN(r.gpus),r.chips?(r.gpus===1?"accelerator, ":"accelerators, ")+r.chips:(r.gpus===1?"accelerator":"accelerators")]); if(r.tokens) f.push([fmtTokens(r.tokens),"training tokens"]); if(powerW(r)) f.push([fmtPower(powerW(r)),"accelerator power ",estLink("power")]);
+  return f.length?'<div class="mkey">'+f.map(function(x){ return '<div><b class="n">'+esc(x[0])+'</b><span>'+esc(x[1])+(x[2]||"")+'</span></div>'; }).join("")+'</div>':"";
 }
 /* A site's description such as "Eight H100" or "1,536 GPUs" gives a chip count and a type; anything else stays as text. */
 var NUMW={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,sixteen:16,twenty:20,"thirty-two":32,"sixty-four":64};
@@ -2215,7 +2233,7 @@ function cmpBar(){ var c=MP.cmp?mrun(MP.cmp):null; if(!c||MP.layer!=="runs") ret
 function cmpHtml(a,b){
   var cell=function(r,v,self){ return v?'<b class="n">'+esc(v)+(self&&r.self?'<small>Self-reported</small>':"")+'</b>':'<b class="na">Not given</b>'; };
   var rows=[["Parameters",function(r){return r.params?fmtParams(r.params):"";}],["Tokens",function(r){return r.tokens?fmtTokens(r.tokens):"";}],["Accelerators",function(r){return r.gpus?fmtN(r.gpus):"";}],["Chips",function(r){return r.chips;}],["Sites",function(r){return r.sites?fmtN(r.sites):"";}],["Nodes",function(r){return r.nodes?fmtN(r.nodes):"";}],["Owners",function(r){return r.owners?fmtN(r.owners):"";}],
-    ["Distance",function(r){return r.dist?fmtN(Math.round(r.dist))+" km":"";},1],["Bandwidth",function(r){return r.link?fmtLink(r.link):"";},1],["Latency",function(r){return r.lat?fmtN(r.lat)+" ms":"";},1],["Efficiency",function(r){return r.eff?sig4(r.eff)+"%":"";},1],
+    ["Distance",function(r){return r.dist?fmtN(Math.round(r.dist))+" km":"";},1],["Bandwidth",function(r){return r.link?fmtLink(r.link):"";},1],["Latency",function(r){return r.lat?fmtN(r.lat)+" ms":"";},1],["Efficiency",function(r){return r.eff?sig4(r.eff)+"%":"";},1],["Power, est.",function(r){return powerW(r)?fmtPower(powerW(r)):"";}],
     ["Coordination",function(r){return r.k>=0?KLAB[r.k]:"";}],["Evidence",function(r){return demo(r)?"Demonstrated":"Indicative";}],["Date",function(r){return r.date?fmtDate(r):"";}]];
   var h='<div class="mcmp" role="table" aria-label="Comparison"><div class="mcmpr mcmph" role="row"><span></span><button type="button" class="mcmpn" data-mswap aria-label="Open '+esc(a.name)+'"><i class="kd '+kc(a)+'"></i>'+esc(a.name)+'</button><span class="mcmpn cur"><i class="kd '+kc(b)+'"></i>'+esc(b.name)+'</span></div>';
   rows.forEach(function(x){ var va=x[1](a), vb=x[1](b); if(!va&&!vb) return; h+='<div class="mcmpr" role="row"><span role="rowheader">'+x[0]+'</span>'+cell(a,va,x[2])+cell(b,vb,x[2])+'</div>'; });
@@ -2622,7 +2640,7 @@ window.__pmap={gl:function(){ return {ends:GL.ends||0,gap:GL.gap,raf:GL.raf,s:GL
 /* ---------- trends ---------- */
 /* Headline tiles, two scatters with fitted trends, runs per year and leaderboards, all linked: a selection or a highlighted year carries across them.
    Fitted lines are analysis drawn from the record, labelled as such, and never stored. */
-var TR={kind:-1,sel:null,yr:null,seen:false,scale:{size:"log",eff:"log"},zx:null,front:false,bn:{},h100:false};
+var TR={kind:-1,sel:null,yr:null,seen:false,scale:{size:"log",eff:"log",bw:"log"},zx:null,front:false,bn:{},h100:false};
 function trList(){ return S.runs.filter(function(r){ return (!S.trReal||r.ev==="real")&&(TR.kind<0||r.k===TR.kind)&&(S.trRange!=="recent"||(r.date&&+r.date.slice(0,4)>=2024)); }); }
 function decYear(r){ if(!r.date) return null; var p=r.date.split("-"); return +p[0]+((+p[1]-1)+(+p[2]-1)/31)/12; }
 function trRun(id){ return S.runs.filter(function(r){return r.id===id;})[0]||null; }
@@ -2643,9 +2661,11 @@ function trTiles(){
   if(big) T.push({v:big.params,f:fmtParams,l:"Largest model pooled across sites",run:big});
   if(far) T.push({v:far.dist,f:function(v){return fmtN(Math.round(v))+" km";},l:"Longest link between sites",run:far});
   if(own) T.push({v:own.owners,f:function(v){return fmtN(Math.round(v));},l:"Most owners in one run",run:own});
+  var eg=(S.figs||[]).filter(function(f){return f.id==="epoch-decentralised-growth";})[0], efr=(S.figs||[]).filter(function(f){return f.id==="epoch-frontier-growth";})[0];
+  if(eg) T.push({v:eg.value,f:function(v){return Math.round(v)+"×";},l:"Yearly growth of decentralised training compute"+(efr?", frontier "+efr.value+"×":""),fig:eg});
   var el=$("trTiles"), pk=$("trTilePick"), pid=pk&&pk.getAttribute("data-id");
   if(pid&&!T.some(function(t){return t.run&&t.run.id===pid;})) tilePeek(null);
-  el.innerHTML=T.map(function(t,i){ return '<button type="button" class="tile"'+(t.run?' data-trun="'+esc(t.run.id)+'" aria-expanded="'+(t.run.id===pid)+'"':' disabled')+'><b class="n" data-i="'+i+'">'+t.f(t.v)+'</b><span>'+t.l+'</span>'+'</button>'; }).join("");
+  el.innerHTML=T.map(function(t,i){ return '<button type="button" class="tile"'+(t.run?' data-trun="'+esc(t.run.id)+'" aria-expanded="'+(t.run.id===pid)+'"':t.fig?' data-trfig="'+esc(t.fig.id)+'" aria-expanded="'+(t.fig.id===pid)+'"':' disabled')+(t.fig?' style="grid-column:1/-1"':'')+'><b class="n" data-i="'+i+'">'+t.f(t.v)+'</b><span>'+t.l+'</span>'+'</button>'; }).join("");
   if(TR.seen) return; TR.seen=true;
   var t0=performance.now(), bs=el.querySelectorAll("b[data-i]");
   var step=function(now){ var p=Math.min(1,(now-t0)/1100), e=ease(p); Array.prototype.forEach.call(bs,function(b){ var t=T[+b.getAttribute("data-i")], v=t.v<10?t.v*e:Math.exp(Math.log(Math.max(1,t.v))*e); b.textContent=t.f(p<1?v:t.v); }); if(p<1) requestAnimationFrame(step); };
@@ -2813,6 +2833,21 @@ function trEffChart(list){
       return {at:function(x){ return f.a+f.b*Math.log10(Math.max(x,1)); },label:pts.toFixed(1)+" "+u+" "+(f.b<0?"lost":"gained")+" per tenfold distance"+(f.r2<.3?", a weak fit":""),
         tip:'<b>Trend</b><span class="n">y = '+cf(f.a)+(f.b<0?' − ':' + ')+cf(pts)+' log<sub>10</sub> x</span><span class="n">'+r2(f)+'</span><small>y in per cent, x in km</small>'}; }});
 }
+/* How much model each Gbps of link carries: analysis drawn from the record, marked as derived. */
+function trBwChart(list){
+  var pts=list.filter(function(r){return r.params&&r.link&&r.date;}).map(function(r){ return {id:r.id,x:decYear(r),y:r.params/r.link,k:r.k,solid:r.ev==="real",name:r.name,p:r.params,l:r.link}; });
+  $("tBwN").textContent=pts.length?plural(pts.length,"run"):"";
+  if(pts.length<2){ $("tBw").innerHTML='<p class="empty">Too few runs state both a model size and a link bandwidth.</p>'; $("tBw")._c=null; return; }
+  var log=TR.scale.bw==="log", x0=Math.floor(d3.min(pts,function(p){return p.x;})), x1=Math.ceil(d3.max(pts,function(p){return p.x;})+.001);
+  var ydom=log?[Math.pow(10,Math.floor(Math.log10(d3.min(pts,function(p){return p.y;})))),Math.pow(10,Math.ceil(Math.log10(d3.max(pts,function(p){return p.y;}))))]:[0,d3.max(pts,function(p){return p.y;})*1.08];
+  scatterChart($("tBw"),{label:"Model size per Gbps of link, by date",ytitle:"Parameters per Gbps of link"+(log?", log scale":""),points:pts,xdom:[x0,x1],xticks:Math.min(10,x1-x0),xfmt:yearFmt(x1-x0),ylog:log,ydom:ydom,
+    yfmt:log?function(v){ var l=Math.log10(v); return Math.abs(l-Math.round(l))<1e-6?fmtParams(v):""; }:function(v){ return v?fmtParams(v):"0"; },left:48,
+    tipVal:function(p){ return fmtParams(p.p)+" over "+fmtLink(p.l)+" · "+fmtParams(p.y)+" per Gbps"; },
+    fit:function(ps){ var f=fitLog(ps.filter(function(p){return p.solid;})); if(!f) return null;
+      return {at:f.at,label:f.b>0?"Model size per Gbps doubles every "+dbl(f):"No rise in model size per Gbps",
+        tip:'<b>Trend of demonstrated runs</b><span class="n">'+r2(f)+' on the log scale</span><small>Parameters divided by the link the source gives</small>'}; }});
+  var note=$("tBwFit"); if(note&&note.classList.contains("on")&&!note.querySelector(".est")) note.insertAdjacentHTML("beforeend",' '+estLink("per-gbps").replace("est.","derived"));
+}
 /* Runs per year, stacked by coordination; a year under the pointer lights up its runs in the charts above. */
 function trYears(list){
   var el=$("tYears"), ys=list.map(function(r){return r.date?+r.date.slice(0,4):null;}).filter(function(y){return y;});
@@ -2846,20 +2881,15 @@ function trYear(v,c,rows,x,stick){
   c.tip.html('<b>'+v+'</b><span>'+plural(n,"run")+'</span>').classed("on",true); var tw=c.tip.node().offsetWidth; c.tip.style("transform","translate("+Math.max(4,Math.min(x(v)+x.bandwidth()/2-tw/2,c.W-tw-4))+"px,-6px)");
 }
 /* Leaderboards: bars grow to their share of the leader. */
-/* H100-equivalents: the chip count times the chip's datasheet peak (dense BF16 or FP16 tensor), over the H100's 989.5 TFLOPS.
-   Only for runs on one named chip type whose datasheet was read; an estimate, labelled as one. Dense figures are half the sparsity figure where a datasheet gives only that. */
-var CHIPS=[[/\bH100\b/i,"H100",989.5,"https://www.nvidia.com/en-us/data-center/h100/"],[/\bH200\b/i,"H200",989.5,"https://www.nvidia.com/en-us/data-center/h200/"],[/\bA100\b/i,"A100",312,"https://www.nvidia.com/en-us/data-center/a100/"],[/\bL40S\b/i,"L40S",362.05,"https://www.nvidia.com/en-us/data-center/l40s/"],[/\bL4\b/i,"L4",121,"https://www.nvidia.com/en-us/data-center/l4/"],[/\bT4\b/i,"T4",65,"https://www.nvidia.com/en-us/data-center/tesla-t4/"]];
-var OTHER=/\b(RTX|GTX|V100|A800|H800|A40|A4000|Ascend|MI\d+|TPU|B200|B300|GB200|GB300|Gaudi|consumer|mixed|heterogeneous)\b/i;
-function h100eq(r){ if(!r.gpus||!r.chips||OTHER.test(r.chips)) return 0; var hit=CHIPS.filter(function(c){ return c[0].test(r.chips); }); if(hit.length!==1) return 0; return r.gpus*hit[0][2]/989.5; }
 function trBoards(){
   var real=trList().filter(function(r){return r.k!==3;});
   real.forEach(function(r){ r.h100=h100eq(r); });
-  var defs=[{t:"Largest Models",u:"Parameters",f:"params",v:fmtParams,s:""},{t:"Longest Links",u:"Link distance in km",f:"dist",v:function(v){return fmtN(Math.round(v));},s:"km"},{t:"Most Owners",u:"Organisations or people contributing",f:"owners",v:fmtN,s:""},{t:"Most Nodes",u:"Machines or devices taking part",f:"nodes",v:fmtN,s:""},TR.h100?{t:"Most Accelerators",u:"H100-equivalents, estimated from datasheet peaks",f:"h100",v:function(v){ return fmtN(Math.round(v)); },s:"H100-eq.",acc:1,sub:function(r){ return fmtN(r.gpus)+" "+r.chips; }}:{t:"Most Accelerators",u:"Number of chips",f:"gpus",v:fmtN,s:"chips",acc:1,sub:function(r){ return r.chips?r.chips.charAt(0).toUpperCase()+r.chips.slice(1):"Chip type not stated"; }}];
+  var defs=[{t:"Largest Models",u:"Parameters",f:"params",v:fmtParams,s:""},{t:"Longest Links",u:"Link distance in km",f:"dist",v:function(v){return fmtN(Math.round(v));},s:"km"},{t:"Most Owners",u:"Organisations or people contributing",f:"owners",v:fmtN,s:""},{t:"Most Nodes",u:"Machines or devices taking part",f:"nodes",v:fmtN,s:""},TR.h100?{t:"Most Accelerators",u:"H100-equivalents",est:"h100",f:"h100",v:function(v){ return fmtN(Math.round(v)); },s:"H100-eq.",acc:1,sub:function(r){ return fmtN(r.gpus)+" "+r.chips; }}:{t:"Most Accelerators",u:"Number of chips",f:"gpus",v:fmtN,s:"chips",acc:1,sub:function(r){ return r.chips?r.chips.charAt(0).toUpperCase()+r.chips.slice(1):"Chip type not stated"; }}];
   var el=$("recs"), h="";
   defs.forEach(function(d){
     var key=d.acc?"acc":d.f; TR.bd=TR.bd||{}; var n=TR.bn[key]||5, all=real.filter(function(r){return r[d.f];}).sort(function(a,b){return b[d.f]-a[d.f];}), top=all.slice(0,n); TR.bd[key]={d:d,all:all,max:all.length?all[0][d.f]:1}; if(!top.length&&!d.acc) return;
     var max=top.length?top[0][d.f]:1;
-    h+='<section class="board"><header><h3>'+d.t+'</h3><p>'+d.u+'</p>'+(d.acc?'<span class="segc bsw" role="group" aria-label="Count"><button type="button" data-trh100="0" aria-pressed="'+!TR.h100+'">Chips</button><button type="button" data-trh100="1" aria-pressed="'+TR.h100+'">H100-eq.</button></span>':'')+'</header><ol>'+top.map(function(r,i){ return bRow(d,r,i,max); }).join("")+'</ol>'+(all.length>n?'<div class="bmore" data-bmore="'+key+'" aria-hidden="true"></div>':'')+(n>5?'<button type="button" class="btop" data-btop="'+key+'">Top 5</button>':'')+(d.acc&&TR.h100?'<p class="bsrc">Datasheets: '+CHIPS.map(function(c){ return '<a href="'+c[3]+'" target="_blank" rel="noopener">'+c[1]+'</a>'; }).join(", ")+'. Runs on other or mixed chips are left out.</p>':'')+'</section>';
+    h+='<section class="board"><header><h3>'+d.t+'</h3><p>'+d.u+(d.est?' '+estLink(d.est):'')+'</p>'+(d.acc?'<span class="segc bsw" role="group" aria-label="Count"><button type="button" data-trh100="0" aria-pressed="'+!TR.h100+'">Chips</button><button type="button" data-trh100="1" aria-pressed="'+TR.h100+'">H100-eq.</button></span>':'')+'</header><ol>'+top.map(function(r,i){ return bRow(d,r,i,max); }).join("")+'</ol>'+(all.length>n?'<div class="bmore" data-bmore="'+key+'" aria-hidden="true"></div>':'')+(n>5?'<button type="button" class="btop" data-btop="'+key+'">Top 5</button>':'')+""+'</section>';
   });
   var keep=TR.bkeep, sl=el.scrollLeft; TR.bkeep=false;
   el.innerHTML=h; if(keep) el.scrollLeft=sl; $("recsH").hidden=!h;
@@ -2890,12 +2920,12 @@ function trCard(r){
   return '<div class="tcard" style="--c:'+kcol(r.k)+'"><div class="tcard-h"><i class="kd" style="--c:'+kcol(r.k)+'"></i><span>'+(r.k>=0?KLAB[r.k]:"")+'</span><button type="button" class="tx" data-trclose aria-label="Close">'+'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button></div><b class="tcard-t">'+esc(r.name)+'</b><span class="tcard-m">'+esc(r.org)+' · '+fmtDate(r)+'</span>'+(f.length?'<span class="tcard-f n">'+esc(f.join(" · "))+'</span>':'')+'<div class="tcard-a">'+(placed?'<button type="button" class="btn primary" data-trmap="'+esc(r.id)+'">Show on the map</button>':'')+'<button type="button" class="btn quiet" data-run="'+esc(r.id)+'">Full record</button></div></div>';
 }
 function trSelect(){
-  ["tSize","tEff"].forEach(function(id){ var c=$(id)._c, pk=$(id+"Pick"); if(c){ c.pts.selectAll("circle").classed("sel",function(p){return p.id===TR.sel;}).transition("sel").duration(250).attr("r",function(p){return p.id===TR.sel?7.5:5;}); }
+  ["tSize","tEff","tBw"].forEach(function(id){ var c=$(id)._c, pk=$(id+"Pick"); if(c){ c.pts.selectAll("circle").classed("sel",function(p){return p.id===TR.sel;}).transition("sel").duration(250).attr("r",function(p){return p.id===TR.sel?7.5:5;}); }
     var inChart=c&&c.data.some(function(p){return p.id===TR.sel;}), r=TR.sel&&inChart?trRun(TR.sel):null;
     pk.innerHTML=r?trCard(r):""; pk.classList.toggle("on",!!r); });
 }
 /* What a run is, in one glance, with the way to the map and to the full record. */
-function peekFacts(r){ var f=[]; if(r.params) f.push(fmtParams(r.params)+" parameters"); if(r.gpus) f.push(fmtN(r.gpus)+(r.gpus===1?" accelerator":" accelerators")); if(r.dist) f.push(fmtN(Math.round(r.dist))+" km"); if(r.eff) f.push(sig4(r.eff)+"% efficiency"); if(r.owners) f.push(plural(r.owners,"owner")); if(r.nodes) f.push(plural(r.nodes,"node")); return f; }
+function peekFacts(r){ var f=[]; if(r.params) f.push(fmtParams(r.params)+" parameters"); if(r.gpus) f.push(fmtN(r.gpus)+(r.gpus===1?" accelerator":" accelerators")); if(r.dist) f.push(fmtN(Math.round(r.dist))+" km"); if(r.eff) f.push(sig4(r.eff)+"% efficiency"); if(r.owners) f.push(plural(r.owners,"owner")); if(r.nodes) f.push(plural(r.nodes,"node")); if(powerW(r)) f.push(fmtPower(powerW(r))+" est."); return f; }
 function peekActs(r){ return '<div class="tcard-a">'+(r.placed&&r.placed.length?'<button type="button" class="btn primary" data-trmap="'+esc(r.id)+'">Show on the map</button>':'')+'<button type="button" class="btn quiet" data-run="'+esc(r.id)+'">Full record</button></div>'; }
 /* A leaderboard row opens in place; a second tap, or another row, closes it. */
 function boardPeek(btn){
@@ -2914,7 +2944,16 @@ function tilePeek(id){
   el.innerHTML='<div class="tcard" style="--c:'+kcol(r.k)+'"><div class="tcard-h"><i class="kd" style="--c:'+kcol(r.k)+'"></i><span>'+(r.k>=0?KLAB[r.k]:"")+'</span><button type="button" class="tx" data-trtclose aria-label="Close">'+'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button></div><b class="tcard-t">'+esc(r.name)+'</b><span class="tcard-m">'+esc(r.org)+' · '+fmtDate(r)+' · '+esc(evLabel(r))+'</span>'+(peekFacts(r).length?'<span class="tcard-f n">'+esc(peekFacts(r).join(" · "))+'</span>':'')+peekActs(r)+'</div>';
   el.classList.add("on");
 }
-function renderCharts(){ if(S.view!=="trends"||!S.runs.length||!window.d3) return; var l=trList(); trSizeChart(l); trEffChart(l); trYears(l); trSelect(); }
+/* The Epoch tile opens the figure, its note and its source, under the tiles. */
+function figPeek(id){
+  var el=$("trTilePick"), f=(S.figs||[]).filter(function(x){return x.id===id;})[0], same=el.getAttribute("data-id")===id;
+  Array.prototype.forEach.call(document.querySelectorAll("#trTiles .tile"),function(t){ t.setAttribute("aria-expanded",String(!!f&&!same&&(t.getAttribute("data-trfig")===id))); });
+  if(!f||same){ el.innerHTML=""; el.classList.remove("on"); el.removeAttribute("data-id"); return; }
+  el.setAttribute("data-id",id);
+  el.innerHTML='<div class="tcard" style="--c:var(--ink3)"><div class="tcard-h"><span>Epoch AI estimate</span><button type="button" class="tx" data-trtclose aria-label="Close"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button></div><b class="tcard-t">'+esc(f.subject)+'</b>'+(f.note?'<span class="tcard-m">'+esc(f.note)+'</span>':'')+sourcesHtml(f)+'<div class="tcard-a"><a class="btn quiet" href="#knowledge/methods/epoch">How this is estimated</a></div></div>';
+  el.classList.add("on");
+}
+function renderCharts(){ if(S.view!=="trends"||!S.runs.length||!window.d3) return; var l=trList(); trSizeChart(l); trEffChart(l); trBwChart(l); trYears(l); trSelect(); }
 function renderTrends(){
   var has=S.runs.length>0, body=$("trBody"), wait=$("trWait");
   body.hidden=!has; wait.hidden=has;
@@ -2929,15 +2968,16 @@ function renderTrends(){
   $("v-trends").addEventListener("click",function(e){
     var nt=e.target.closest(".tfit-note.on"); if(nt&&nt._c){ var c=nt._c, P=c.fitPx; if(P&&P.length){ var q=P[Math.max(0,P.length-3)]; var on=!!c.fpin; fitTip(c,on?null:q,!on); } return; }
     var cx=e.target.closest("[data-trscale],[data-trfront],[data-trzoomx],[data-trh100],[data-btop]");
-    if(cx){ if(cx.hasAttribute("data-trscale")){ var sp=cx.getAttribute("data-trscale").split(":"); TR.scale[sp[0]]=sp[1]; Array.prototype.forEach.call(document.querySelectorAll('[data-trscale^="'+sp[0]+':"]'),function(b){ b.setAttribute("aria-pressed",String(b===cx)); }); if(sp[0]==="size") trSizeChart(trList()); else trEffChart(trList()); }
+    if(cx){ if(cx.hasAttribute("data-trscale")){ var sp=cx.getAttribute("data-trscale").split(":"); TR.scale[sp[0]]=sp[1]; Array.prototype.forEach.call(document.querySelectorAll('[data-trscale^="'+sp[0]+':"]'),function(b){ b.setAttribute("aria-pressed",String(b===cx)); }); if(sp[0]==="size") trSizeChart(trList()); else if(sp[0]==="eff") trEffChart(trList()); else trBwChart(trList()); }
       else if(cx.hasAttribute("data-trfront")){ TR.front=!TR.front; TR.zx=null; trSizeChart(trList()); }
       else if(cx.hasAttribute("data-trzoomx")) trZoomReset();
       else if(cx.hasAttribute("data-trh100")){ TR.h100=cx.getAttribute("data-trh100")==="1"; TR.bkeep=true; trBoards(); }
       else if(cx.hasAttribute("data-btop")){ TR.bn[cx.getAttribute("data-btop")]=5; TR.bkeep=true; trBoards(); }
       return; }
-    var t=e.target.closest("[data-trun],[data-trk],[data-trmap],[data-trclose],[data-trtclose]"); if(!t) return;
+    var t=e.target.closest("[data-trun],[data-trfig],[data-trk],[data-trmap],[data-trclose],[data-trtclose]"); if(!t) return;
     if(t.hasAttribute("data-trun")&&t.closest(".board")) boardPeek(t);
     else if(t.hasAttribute("data-trun")) tilePeek(t.getAttribute("data-trun"));
+    else if(t.hasAttribute("data-trfig")) figPeek(t.getAttribute("data-trfig"));
     else if(t.hasAttribute("data-trtclose")) tilePeek(null);
     else if(t.hasAttribute("data-trk")){ var k=+t.getAttribute("data-trk"); TR.kind=TR.kind===k?-1:k; renderTrends(); }
     else if(t.hasAttribute("data-trmap")){ location.hash="map/"+encodeURIComponent(t.getAttribute("data-trmap")); }
@@ -2985,12 +3025,28 @@ document.addEventListener("touchend",function(e){ if(!e.touches.length){ TR.touc
 document.addEventListener("touchcancel",function(){ TR.touching=false; TR.touchEnd=Date.now(); },{passive:true,capture:true});
 /* ---------- Knowledge base: runs, concepts, news and regulation, with one search and one filter sheet ---------- */
 var KB={q:"",k:-1,ev:"all",y:"",area:"",site:"",sort:"new",theme:"",topic:"",region:"",j:"",s:"all"};
-var KSEC=[["runs","Runs"],["con","Concepts"],["devs","News"],["reg","Regulation"]], KHASH={runs:"runs",con:"concepts",devs:"news",reg:"regulation"};
+var KSEC=[["runs","Runs"],["con","Concepts"],["devs","News"],["reg","Regulation"],["met","Methods"]], KHASH={runs:"runs",con:"concepts",devs:"news",reg:"regulation",met:"methods"};
+/* How the tracker's own calculations are made. Every figure marked est. links to its entry here. */
+var METHODS=[
+ {id:"estimates",t:"Estimated figures",p:["A few figures in the tracker are calculated rather than taken from a source. Each is marked est. and links here.","They are calculated only for runs whose source gives both the number of accelerators and one named chip type with a datasheet on file. Runs on mixed, unnamed or other chips are left out, and where a source states the figure itself, the source's figure is used."]},
+ {id:"h100",t:"H100-equivalents",p:["The number of chips times the chip's peak dense BF16 or FP16 tensor throughput, divided by the H100's 989.5 TFLOPS.","Peak figures come from NVIDIA's product pages. Where a page gives only the figure with sparsity, the dense figure is half of it, as NVIDIA's footnotes state; where a chip comes in several forms, the SXM form is used. Peak throughput compares the hardware, not what a run achieved."],chips:"tf"},
+ {id:"power",t:"Accelerator power",p:["The number of chips times the chip's maximum board power, its thermal design power on NVIDIA's product pages, in the SXM form where a part comes in several.","It counts the accelerators only, at full rated power. Servers, networking and cooling are left out, so a site draws more; a run that does not hold its chips at full power draws less."],chips:"w"},
+ {id:"trends",t:"Trend lines",p:["A trend line is an ordinary least-squares fit drawn from the record each time the page opens, never stored. For model size and for size per Gbps it is fitted to the logarithm of the value against the date, using demonstrated runs; for efficiency, to efficiency against the logarithm of distance, from five runs upward.","The equation and R\u00b2 appear on the line, by hover or tap. A doubling time follows from the slope."]},
+ {id:"per-gbps",t:"Model size per Gbps",p:["Parameters divided by the link bandwidth the source gives, for runs that state both.","Sources report bandwidth per node, per link or in total, so the chart shows a direction rather than a precise rate."]},
+ {id:"epoch",t:"Growth of decentralised compute",p:["The growth rates in the Trends tile are Epoch AI's estimates, not the tracker's: about 20 times a year for compute used in decentralised training runs, against about 5 times a year at the frontier, from Epoch's analysis of 29 December 2025."],fig:["epoch-decentralised-growth","epoch-frontier-growth"]}];
+function renderMethods(){
+  var el=$("metList"), open=keepOpen(el,"data-method");
+  el.innerHTML='<div class="ents">'+kMets().map(function(m){
+    var tb=m.chips?'<table class="mtab"><thead><tr><th>Chip</th><th>'+(m.chips==="tf"?"Peak dense TFLOPS":"Board power")+'</th><th>Source</th></tr></thead><tbody>'+CHIPS.map(function(c){ return '<tr><td>'+c[1]+'</td><td class="n">'+(m.chips==="tf"?fmtN(c[2]):c[3]+" W")+'</td><td><a href="'+c[4]+'" target="_blank" rel="noopener">NVIDIA</a></td></tr>'; }).join("")+'</tbody></table>':"";
+    var src=m.fig?(m.fig.map(function(id){ return (S.figs||[]).filter(function(f){return f.id===id;})[0]; }).filter(Boolean)[0]||null):null;
+    return '<details class="ent" data-method="'+m.id+'"'+(open[m.id]?" open":"")+'><summary><span class="ent-s"><span><span class="t">'+esc(m.t)+'</span></span>'+CHEV+'</span></summary><div class="ent-body">'+m.p.map(function(x){ return '<p>'+esc(x)+'</p>'; }).join("")+tb+(src?sourcesHtml(src):"")+'</div></details>'; }).join("")+'</div>';
+}
+function openMethod(id){ kReveal("met",'[data-method="'+String(id).replace(/"/g,"")+'"]'); }
 var THEMES=[["pool","Ways of pooling"],["method","Training methods"],["infra","Infrastructure"],["gov","Governance"]];
 var JGROUPS=[["EU","EU"],["US","US"],["CN","China"],["UK","UK"],["other","Other"]];
 var KSTAT=[["all","All"],["force","In force"],["proposed","Proposed"]];
 /* Ordering lives up front, apart from the filters: one choice per section, remembered while the page is open. */
-var KSORTS={runs:[["new","Newest"],["old","Oldest"],["size","Largest model"],["dist","Longest link"],["az","A to Z"]],con:[["az","A to Z"],["theme","Theme"]],devs:[["new","Newest"],["old","Oldest"]],reg:[["new","Newest"],["status","Status"],["az","A to Z"]]};
+var KSORTS={met:[["page","As written"]],runs:[["new","Newest"],["old","Oldest"],["size","Largest model"],["dist","Longest link"],["az","A to Z"]],con:[["az","A to Z"],["theme","Theme"]],devs:[["new","Newest"],["old","Oldest"]],reg:[["new","Newest"],["status","Status"],["az","A to Z"]]};
 var KSORT_BY={runs:"new",con:"az",devs:"new",reg:"new"};
 function kSortSync(){ var el=$("kbSort"); if(!el) return; var sec=S.dbTab, o=KSORTS[sec]||[]; el.innerHTML=o.map(function(x){ return '<option value="'+x[0]+'"'+(KSORT_BY[sec]===x[0]?" selected":"")+'>'+x[1]+'</option>'; }).join(""); var l=$("kbSortL"); if(l) l.textContent=(o.filter(function(x){return x[0]===KSORT_BY[sec];})[0]||["",""])[1]; }
 
@@ -3026,7 +3082,8 @@ function kRules(noQ){ var w=noQ?[]:kWords(), ORD={force:0,proposed:1,gone:2};
   return S.rules.filter(function(r){ return (!KB.j||jurGroup(r.jur)===KB.j)&&(KB.s==="all"||polStatus(r)===KB.s)&&kHit([r.title,r.short,r.relevance,r.pooled,JUR[r.jur]||r.jur,r.status,r.provisions.map(function(p){return p.quote;}).join(" ")],w); })
     .sort(function(a,b){ var yr=ruleYear(a)<ruleYear(b)?1:ruleYear(a)>ruleYear(b)?-1:0, az=(a.short||a.title).toLowerCase()<(b.short||b.title).toLowerCase()?-1:1;
       return KSORT_BY.reg==="az"?az:KSORT_BY.reg==="status"?(ORD[polStatus(a)]-ORD[polStatus(b)]||yr||az):(yr||ORD[polStatus(a)]-ORD[polStatus(b)]||az); }); }
-function kList(sec,noQ){ return sec==="runs"?kRuns(noQ):sec==="con"?kCons(noQ):sec==="devs"?kDevs(noQ):kRules(noQ); }
+function kList(sec,noQ){ return sec==="runs"?kRuns(noQ):sec==="con"?kCons(noQ):sec==="devs"?kDevs(noQ):sec==="met"?kMets(noQ):kRules(noQ); }
+function kMets(noQ){ var w=noQ?[]:kWords(); return METHODS.filter(function(m){ return kHit([m.t,m.p.join(" ")],w); }); }
 
 /* The filters in force in a section, as [key, label] pairs; each shows as a removable pill. */
 function kActive(sec){
@@ -3159,9 +3216,9 @@ function renderPolicy(){
 }
 function renderDatabase(){
   var sec=S.dbTab; kSortSync();
-  $("dbRuns").hidden=sec!=="runs"; $("dbCons").hidden=sec!=="con"; $("dbDevs").hidden=sec!=="devs"; $("dbReg").hidden=sec!=="reg";
+  $("dbRuns").hidden=sec!=="runs"; $("dbCons").hidden=sec!=="con"; $("dbDevs").hidden=sec!=="devs"; $("dbReg").hidden=sec!=="reg"; $("dbMet").hidden=sec!=="met";
   kChrome();
-  if(sec==="runs") renderRunList(); else if(sec==="con") renderConcepts(); else if(sec==="reg") renderPolicy(); else renderNews();
+  if(sec==="runs") renderRunList(); else if(sec==="con") renderConcepts(); else if(sec==="reg") renderPolicy(); else if(sec==="met") renderMethods(); else renderNews();
 }
 /* Opening an entry from elsewhere clears the search and filters that could hide it. */
 function kReveal(sec,sel){
