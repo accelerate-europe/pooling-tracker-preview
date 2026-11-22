@@ -895,6 +895,20 @@ a.est:hover span{color:var(--ink);background:var(--line2)}
 #mCoLab.far .mco.cl b{left:16.5px;top:16.5px;width:11px;height:11px;font-size:9.5px}
 #mCoLab.far .mco.sel i{transform:scale(1.4)}
 
+/* Company shelves: one per type, swiped sideways, one card at a time */
+.mcoshelf{margin-top:6px}
+.mcosh{display:flex;align-items:center;justify-content:space-between;gap:8px}.mcosh .mlab{margin:10px 0 6px}
+.mcosh .link{min-height:36px;padding:0 4px;font-size:13.5px;font-weight:650}
+.mcotrack{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 -16px;padding:2px 16px 8px;scroll-padding:0 16px;overscroll-behavior-x:contain}
+.mcotrack::-webkit-scrollbar{display:none}
+.mcocard{flex:0 0 clamp(140px,38%,190px);scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-height:118px;padding:12px;border-radius:12px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);text-align:left}
+.mcocard b{font:700 14.5px/1.25 var(--read);color:var(--ink)}
+.mcocard small{font-size:12px;color:var(--ink3)}
+.mcocard .w{font-size:12.5px;line-height:1.35;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mcocard .rb{margin-top:auto;padding:1px 7px;border-radius:9px;background:var(--sunk);font-size:11.5px;font-weight:650;color:var(--ink2)}
+.mcocard:active{background:var(--sunk)}
+@media (hover:hover){.mcocard:hover{box-shadow:inset 0 0 0 1px var(--ink3)}}
+
 @media (hover:hover){
   .tabs a:hover{background:var(--line2);color:var(--ink)}
   .tabs a[aria-current="page"]:hover{background:var(--accent-soft)}
@@ -2504,7 +2518,7 @@ function play(){
     var b=mbox.getBoundingClientRect(); MP.tapAt=Date.now(); mapTap(e.clientX-b.left,e.clientY-b.top); });
   mbox.addEventListener("pointercancel",function(){ tp=null; setHover(""); });
   v.addEventListener("click",function(e){
-    var t=e.target.closest("[data-mfopen],[data-mfclose],[data-mfclear],[data-mpx],[data-mlayer],[data-mjur],[data-mregs],[data-mev],[data-msite],[data-mfocus],[data-mpick],[data-mreg],[data-mdesel],[data-mstep],[data-mlist],[data-mf2],[data-mkind],[data-mmore],[data-mzoom],[data-mplay],[data-myears],[data-y],[data-mqclear],[data-mctryx],[data-mshare],[data-mcmp],[data-mcmpx],[data-mswap],[data-mco],[data-mcogo],[data-mcocl],[data-mcorun],[data-mcoall],[data-mcot],#mGrab");
+    var t=e.target.closest("[data-mfopen],[data-mfclose],[data-mfclear],[data-mpx],[data-mlayer],[data-mjur],[data-mregs],[data-mev],[data-msite],[data-mfocus],[data-mpick],[data-mreg],[data-mdesel],[data-mstep],[data-mlist],[data-mf2],[data-mkind],[data-mmore],[data-mzoom],[data-mplay],[data-myears],[data-y],[data-mqclear],[data-mctryx],[data-mshare],[data-mcmp],[data-mcmpx],[data-mswap],[data-mco],[data-mcogo],[data-mcocl],[data-mcorun],[data-mcoall],[data-mcot],[data-mcoshelf],#mGrab");
     if(!t||(t.hasAttribute("data-msite")&&e.detail)){
       /* A pointer tap on the map: resolved by distance. A keyboard press on a site button falls through to the site. */
       if(e.target.closest("#mapbox")&&!e.target.closest(".mregs,.mzoom,.mchoose,.mtop,.mpills,.mjur,.mco")&&MP.built&&Date.now()-(MP.tapAt||0)>700&&Date.now()-GL.stopAt>450){ var b=$("mapbox").getBoundingClientRect(); mapTap(e.clientX-b.left,e.clientY-b.top); }
@@ -2518,6 +2532,7 @@ function play(){
     if(t.hasAttribute("data-mco")){ pickCo(t.getAttribute("data-mco"),!!t.closest("#mBody")); return; }
     if(t.hasAttribute("data-mcogo")){ var cg=t.getAttribute("data-mcogo"); setLayer("co"); pickCo(cg,true); return; }
     if(t.hasAttribute("data-mcocl")){ coCluster(t.getAttribute("data-mcocl").split(",")); return; }
+    if(t.hasAttribute("data-mcoshelf")){ MP.coAll=t.getAttribute("data-mcoshelf"); renderPanel(true); if(MP.coAll&&!side()&&MP.detent==="peek") setDetent("half"); return; }
     if(t.hasAttribute("data-mcoall")){ MP.coCl=null; renderPanel(); return; }
     if(t.hasAttribute("data-mcot")){ var ct=t.getAttribute("data-mcot"); MP.coT=MP.coT===ct?"":ct; if(MP.coSel){ var sc=coBy(MP.coSel); if(sc&&!coIn(sc)) MP.coSel=""; } renderPanel(true); return; }
     if(t.hasAttribute("data-mcorun")){ var rid=t.getAttribute("data-mcorun"); setLayer("runs"); pick(rid,"link"); return; }
@@ -3338,9 +3353,17 @@ function coHtml(){
   var list=coList(), sub=MP.coCl?list.filter(function(x){ return MP.coCl.indexOf(x.id)>=0; }):null;
   if(sub){ var city=sub[0]?(sub[0].city||sub[0].country):""; h+='<button type="button" class="mback" data-mcoall>'+BACK+'All companies</button><p class="mlab">'+plural(sub.length,"company")+(city?" in "+esc(city):"")+'</p><div class="mcolist">'+sub.map(coRow).join("")+'</div>'; return h; }
   if(!list.length) return h+'<p class="empty">'+(MP.coQ?"The search finds no company.":"This filter leaves the list empty.")+'</p>';
-  ["software","network"].forEach(function(t){ var part=list.filter(function(x){ return x.type===t; }); if(!part.length) return; h+='<p class="mlab"><i class="cosq t-'+t+'"></i>'+COT[t]+' <span class="n">'+part.length+'</span></p><div class="mcolist">'+part.map(coRow).join("")+'</div>'; });
+  var of=function(t){ return list.filter(function(x){ return x.type===t||x.also===t; }); };
+  /* A type opened from its shelf, or any search or filter, lists the matches flat. */
+  if(MP.coAll){ var part=of(MP.coAll).sort(coRank); return h+'<button type="button" class="mback" data-mcoshelf="">'+BACK+'All companies</button><p class="mlab"><i class="cosq t-'+MP.coAll+'"></i>'+COT[MP.coAll]+' <span class="n">'+part.length+'</span></p><div class="mcolist">'+part.map(coRow).join("")+'</div>'; }
+  if(MP.coQ||MP.coT||MP.area){ ["software","network"].forEach(function(t){ var part=list.filter(function(x){ return x.type===t; }); if(!part.length) return; h+='<p class="mlab"><i class="cosq t-'+t+'"></i>'+COT[t]+' <span class="n">'+part.length+'</span></p><div class="mcolist">'+part.map(coRow).join("")+'</div>'; }); return h; }
+  /* Otherwise one shelf per type, swiped sideways, the companies with most runs on the record first. */
+  ["software","network"].forEach(function(t){ var part=of(t).sort(coRank); if(!part.length) return;
+    h+='<div class="mcoshelf"><div class="mcosh"><p class="mlab"><i class="cosq t-'+t+'"></i>'+COT[t]+' <span class="n">'+part.length+'</span></p><button type="button" class="link" data-mcoshelf="'+t+'">See all</button></div><div class="mcotrack">'+part.map(function(c){ var n=coRuns(c).length, what=(c.products[0]||c.role||"").split(/[.;]/)[0];
+      return '<button type="button" class="mcocard" data-mco="'+esc(c.id)+'"><b>'+esc(c.name)+'</b><small>'+esc([c.city,c.country].filter(Boolean).join(", "))+'</small>'+(what?'<span class="w">'+esc(what)+'</span>':'')+(n?'<span class="rb">'+plural(n,"run")+'</span>':'')+'</button>'; }).join("")+'</div></div>'; });
   return h;
 }
+function coRank(a,b){ return coRuns(b).length-coRuns(a).length||(a.name.toLowerCase()<b.name.toLowerCase()?-1:1); }
 function coCard(c){
   var h='<button type="button" class="mback" data-mco="">'+BACK+'All companies</button>';
   h+='<div class="mhead"><span class="mk"><i class="cosq t-'+c.type+'"></i>'+COT[c.type]+(c.also?' · '+COT[c.also]:"")+'</span><h2 class="mt">'+esc(c.name)+'</h2><p class="mo">'+esc([c.city,c.country].filter(Boolean).join(", "))+'</p>'+(c.prec==="region"?'<span class="meta"><span class="chip conflict">Placed by region</span></span>':c.prec==="registered"?'<span class="meta"><span class="chip">Registered office</span></span>':c.prec==="office"?'<span class="meta"><span class="chip">Office, not headquarters</span></span>':"")+'</div>';
