@@ -641,7 +641,7 @@ html.mdragging,html.mdragging *{cursor:grabbing!important;-webkit-user-select:no
 .tpt.dim{opacity:.16}
 .tfit{fill:none;stroke:var(--hot-d);stroke-width:2;stroke-linecap:round}
 .tfit-halo{fill:none;stroke:var(--hot);stroke-width:10;stroke-opacity:.14;stroke-linecap:round}
-.tfit-note{display:flex;flex-wrap:wrap;align-items:center;column-gap:8px;row-gap:2px;margin:2px 0 0;font-size:13px;color:var(--ink2);opacity:0;transform:translateY(-3px);transition:opacity .5s .9s,transform .5s .9s cubic-bezier(.2,.8,.2,1)}.tfit-note.on{opacity:1;transform:none}.tfit-eq{flex:1 0 100%;padding-left:26px;font-size:11.5px;line-height:1.4;color:var(--ink3);letter-spacing:.01em}.tfit-eq sup,.tfit-eq sub{font-size:.78em;line-height:0}.tfit-note i{flex:none;width:18px;height:2px;border-radius:1px;background:var(--hot)}
+.tfit-note{display:flex;align-items:center;gap:8px;align-self:flex-start;margin:2px 0 0;border-radius:6px;font-size:13px;color:var(--ink2);opacity:0;transform:translateY(-3px);transition:opacity .5s .9s,transform .5s .9s cubic-bezier(.2,.8,.2,1)}.tfit-note.on{opacity:1;transform:none}.tfit-note i{flex:none;width:18px;height:2px;border-radius:1px;background:var(--hot)}
 .tcross{stroke:var(--edge);stroke-dasharray:3 4;transition:opacity .15s var(--ease)}
 .ttip{position:absolute;left:0;top:0;z-index:3;max-width:220px;padding:6px 9px 7px;border-radius:8px;background:var(--ink);color:var(--ground);box-shadow:0 6px 18px rgba(0,0,0,.2);pointer-events:none;opacity:0;transition:opacity .12s ease,transform .16s cubic-bezier(.2,.8,.2,1);will-change:transform}
 .ttip.on{opacity:1}
@@ -844,6 +844,19 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
 /* On a computer the Trends page uses the width it has. */
 @media (min-width:1080px){ #v-trends .page{max-width:1240px} }
 
+.tfit-note.on{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tfit-note.on span{text-decoration:underline dotted color-mix(in srgb,var(--ink3) 55%,transparent);text-underline-offset:3px;text-decoration-thickness:1px}
+.tfit-note.on:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.tfit.hot{stroke-width:3}
+.tfit-tip{max-width:240px;gap:1px}.tfit-tip span{font-size:12.5px;color:inherit;opacity:.92}.tfit-tip small{display:block;margin-top:3px;font-size:11px;line-height:1.3;opacity:.72}
+.tfit-tip sup,.tfit-tip sub{font-size:.75em;line-height:0}
+#trTilePick{margin-top:10px}
+.brow[aria-expanded="true"]{background:var(--sunk)}
+.bpeek{display:flex;flex-direction:column;gap:4px;padding:2px 10px 12px 42px;animation:mup .3s cubic-bezier(.2,.8,.2,1) both}
+.bpeek .tcard-a{margin-top:6px}
+.tile[aria-expanded="true"]{box-shadow:0 0 0 1.5px var(--ink)}
+.bpeek .tcard-f,#trTilePick .tcard-f{font-weight:600}
+
 @media (hover:hover){
   .tabs a:hover{background:var(--line2);color:var(--ink)}
   .tabs a[aria-current="page"]:hover{background:var(--accent-soft)}
@@ -1042,7 +1055,7 @@ button.mcmpn{text-decoration:underline;text-decoration-color:var(--line);text-un
         <h1 class="h1">Trends</h1>
         <div id="trWait"></div>
         <div id="trBody" hidden>
-          <div class="tiles" id="trTiles"></div>
+          <div class="tiles" id="trTiles"></div><div class="tpick" id="trTilePick"></div>
           <div class="tr-ctl">
             <div class="segc" id="trEv" role="group" aria-label="Evidence"><button type="button" data-trev="all" aria-pressed="true">All runs</button><button type="button" data-trev="real" aria-pressed="false">Demonstrated only</button></div>
           </div>
@@ -1479,7 +1492,7 @@ function ruleBody(r){
   var h=(r.relevance?'<p>'+escPow(r.relevance)+'</p>':"")+'<dl class="facts">'+f.map(function(x){return '<dt>'+esc(x[0])+'</dt><dd>'+escPow(x[1])+'</dd>';}).join("")+'</dl>';
   if(r.provisions.length) h+='<p class="pol-h">Provisions</p>'+r.provisions.map(function(p){ return '<blockquote class="pol-q">'+(p.ref?'<b>'+esc(p.ref)+'</b>':"")+'“'+escPow(p.quote)+'”'+(p.point?'<span>'+escPow(p.point)+'</span>':"")+'</blockquote>'; }).join("");
   var tl=r.devs.map(function(id){ return BY[id]; }).filter(function(x){ return x&&st(x)==="approved"; }).sort(function(a,b){ return (a.found||"")<(b.found||"")?1:-1; });
-  if(tl.length) h+='<p class="pol-h">Developments</p><ul class="pol-tl">'+tl.map(function(x){ return '<li><time>'+esc(x.when||x.found||"")+'</time><button type="button" class="link" data-rundb="'+esc(x.id)+'">'+esc(x.title)+'</button></li>'; }).join("")+'</ul>';
+  if(tl.length) h+='<p class="pol-h">News</p><ul class="pol-tl">'+tl.map(function(x){ return '<li><time>'+esc(x.when||x.found||"")+'</time><button type="button" class="link" data-rundb="'+esc(x.id)+'">'+esc(x.title)+'</button></li>'; }).join("")+'</ul>';
   return h+(r.note?'<p class="quiet">'+esc(r.note)+'</p>':"")+sourcesHtml(r);
 }
 function renderFigList(){
@@ -2600,8 +2613,9 @@ function trTiles(){
   if(big) T.push({v:big.params,f:fmtParams,l:"Largest model pooled across sites",run:big});
   if(far) T.push({v:far.dist,f:function(v){return fmtN(Math.round(v))+" km";},l:"Longest link between sites",run:far});
   if(own) T.push({v:own.owners,f:function(v){return fmtN(Math.round(v));},l:"Most owners in one run",run:own});
-  var el=$("trTiles");
-  el.innerHTML=T.map(function(t,i){ return '<button type="button" class="tile"'+(t.run?' data-trun="'+esc(t.run.id)+'"':' disabled')+'><b class="n" data-i="'+i+'">'+t.f(t.v)+'</b><span>'+t.l+'</span>'+(t.run?'<small>'+esc(t.run.name)+(demo(t.run)?'':' · Indicative')+'</small>':'')+'</button>'; }).join("");
+  var el=$("trTiles"), pk=$("trTilePick"), pid=pk&&pk.getAttribute("data-id");
+  if(pid&&!T.some(function(t){return t.run&&t.run.id===pid;})) tilePeek(null);
+  el.innerHTML=T.map(function(t,i){ return '<button type="button" class="tile"'+(t.run?' data-trun="'+esc(t.run.id)+'" aria-expanded="'+(t.run.id===pid)+'"':' disabled')+'><b class="n" data-i="'+i+'">'+t.f(t.v)+'</b><span>'+t.l+'</span>'+(t.run?'<small>'+esc(t.run.name)+(demo(t.run)?'':' · Indicative')+'</small>':'')+'</button>'; }).join("");
   if(TR.seen) return; TR.seen=true;
   var t0=performance.now(), bs=el.querySelectorAll("b[data-i]");
   var step=function(now){ var p=Math.min(1,(now-t0)/1100), e=ease(p); Array.prototype.forEach.call(bs,function(b){ var t=T[+b.getAttribute("data-i")], v=t.v<10?t.v*e:Math.exp(Math.log(Math.max(1,t.v))*e); b.textContent=t.f(p<1?v:t.v); }); if(p<1) requestAnimationFrame(step); };
@@ -2610,7 +2624,7 @@ function trTiles(){
 
 /* One scatter: points join with transitions, a fitted line draws itself, the nearest point answers the pointer. */
 function scatterChart(el,o){
-  var W=Math.max(260,el.clientWidth), H=W<520?290:Math.round(Math.min(470,Math.max(370,W*.4))), m={l:o.left||46,r:16,t:o.ytitle?30:16,b:o.xtitle?48:30};
+  var W=Math.max(260,el.clientWidth), H=W<520?260:W<900?330:370, m={l:o.left||46,r:16,t:o.ytitle?30:16,b:o.xtitle?48:30};
   var c=el._c;
   if(!c||c.W!==W){
     el.innerHTML=""; c=el._c={W:W,H:H};
@@ -2622,9 +2636,15 @@ function scatterChart(el,o){
     c.cross=c.svg.append("line").attr("class","tcross").attr("y1",m.t).attr("y2",H-m.b).style("opacity",0);
     c.pts=c.svg.append("g");
     c.tip=document.createElement("div"); c.tip.className="ttip"; c.tip.setAttribute("aria-hidden","true"); el.appendChild(c.tip);
-    c.svg.on("pointermove",function(e){ if(e.pointerType!=="mouse") return; c.q=d3.pointer(e); if(!c.raf) c.raf=requestAnimationFrame(function(){ c.raf=0; if(c.q) hover(c,nearest(c,c.q),c.o); }); })
-         .on("pointerleave",function(){ c.q=null; hover(c,null,c.o); })
-         .on("click",function(e){ var h=nearest(c,d3.pointer(e)); if(h){ TR.sel=TR.sel===h.id?null:h.id; trSelect(); } else if(TR.sel){ TR.sel=null; trSelect(); } });
+    c.ftip=document.createElement("div"); c.ftip.className="ttip tfit-tip"; el.appendChild(c.ftip);
+    /* A run under the pointer wins; otherwise, close to the fitted line, the line explains itself. */
+    c.svg.on("pointermove",function(e){ if(e.pointerType!=="mouse") return; c.q=d3.pointer(e); if(!c.raf) c.raf=requestAnimationFrame(function(){ c.raf=0; if(!c.q) return; var p=nearest(c,c.q); hover(c,p,c.o); if(!p&&!c.fpin) fitTip(c,fitNear(c,c.q,10)?c.q:null); else if(p&&!c.fpin) fitTip(c,null); }); })
+         .on("pointerleave",function(){ c.q=null; hover(c,null,c.o); if(!c.fpin) fitTip(c,null); })
+         .on("click",function(e){ var q=d3.pointer(e), h=nearest(c,q), dl=fitDist(c,q), tol=e.pointerType==="mouse"?10:18, dp=h?Math.hypot(c.x(h.x)-q[0],c.y(h.y)-q[1]):1/0;
+           /* A tap right on a run picks the run; a tap on the line, or nearer the line than any run, explains the line. */
+           if(h&&(dp<=12||dl>tol||dp<dl)){ fitTip(c,null); TR.sel=TR.sel===h.id?null:h.id; trSelect(); return; }
+           if(dl<=tol){ var on=c.fpin&&Math.hypot(q[0]-c.fpin[0],q[1]-c.fpin[1])<24; fitTip(c,on?null:q,!on); return; }
+           fitTip(c,null); if(TR.sel){ TR.sel=null; trSelect(); } });
   }
   c.yt.text(o.ytitle||""); c.xt.text(o.xtitle||"");
   var pts=o.points, xs=pts.map(function(p){return p.x;}), ys=pts.map(function(p){return p.y;});
@@ -2658,10 +2678,22 @@ function scatterChart(el,o){
     var d=line(seg);
     if(!c.fitD){ c.fit.attr("d",d); c.fitHalo.attr("d",d); var L=c.fit.node().getTotalLength(); c.fit.attr("stroke-dasharray",L+" "+L).attr("stroke-dashoffset",L).transition().delay(first?900:0).duration(1100).ease(d3.easeCubicInOut).attr("stroke-dashoffset",0).on("end",function(){ c.fit.attr("stroke-dasharray",null); }); c.fitHalo.style("opacity",0).transition().delay(first?1300:0).duration(700).style("opacity",1); }
     else { c.fit.attr("stroke-dasharray",null).transition().duration(750).ease(d3.easeCubicOut).attr("d",d); c.fitHalo.transition().duration(750).ease(d3.easeCubicOut).attr("d",d); }
-    c.fitD=d; c.fit.style("opacity",1); var end=seg[seg.length-1];
-    if(c.note){ c.note.innerHTML='<i></i><span>'+esc(f.label)+'</span>'+(f.eq?'<small class="tfit-eq n">'+f.eq+'</small>':''); c.note.classList.add("on"); }
-  } else { c.fit.style("opacity",0); c.fitHalo.style("opacity",0); if(c.note) c.note.classList.remove("on"); }
+    c.fitD=d; c.fit.style("opacity",1); c.fitPx=seg.map(function(s){ return [c.x(s[0]),c.y(s[1])]; }); c.fitInfo=f.tip||""; if(c.fpin) fitTip(c,null);
+    if(c.note){ c.note.innerHTML='<i></i><span>'+esc(f.label)+'</span>'; c.note.classList.add("on"); c.note.setAttribute("role","button"); c.note.setAttribute("tabindex","0"); c.note.setAttribute("aria-label",f.label+". Show the equation"); c.note._c=c; }
+  } else { c.fit.style("opacity",0); c.fitHalo.style("opacity",0); c.fitPx=null; fitTip(c,null); if(c.note){ c.note.classList.remove("on"); c.note.removeAttribute("role"); c.note.removeAttribute("tabindex"); } }
   c.o=o;
+}
+/* Distance from a point to the fitted line as drawn, in pixels. */
+function fitDist(c,q){ var P=c.fitPx, best=1/0; if(!P||P.length<2) return best; for(var i=1;i<P.length;i++){ var a=P[i-1], b=P[i], dx=b[0]-a[0], dy=b[1]-a[1], L=dx*dx+dy*dy, t=L?Math.max(0,Math.min(1,((q[0]-a[0])*dx+(q[1]-a[1])*dy)/L)):0; best=Math.min(best,Math.hypot(q[0]-a[0]-t*dx,q[1]-a[1]-t*dy)); } return best; }
+function fitNear(c,q,tol){ return fitDist(c,q)<=tol; }
+/* The fitted line's equation and R squared, beside the pointer or the tap; pinned by a tap until the next one. */
+function fitTip(c,q,pin){
+  var t=c.ftip; if(!t) return;
+  if(!q||!c.fitInfo){ t.classList.remove("on"); c.fpin=null; c.fit.classed("hot",false); return; }
+  t.innerHTML=c.fitInfo; c.fpin=pin?q:null; c.fit.classed("hot",true);
+  var w=t.offsetWidth, h=t.offsetHeight, x=q[0]+14, y=q[1]-h-14;
+  if(x+w>c.W-2) x=q[0]-w-14; if(x<2) x=2; if(y<2) y=q[1]+14; if(y+h>c.H-2) y=c.H-h-2;
+  t.style.transform="translate("+Math.round(x)+"px,"+Math.round(y)+"px)"; t.classList.add("on");
 }
 function nearest(c,q){ if(!c.del||!c.data.length) return null; var i=c.del.find(q[0],q[1]), p=c.data[i]; return p&&Math.hypot(c.x(p.x)-q[0],c.y(p.y)-q[1])<30?p:null; }
 function hover(c,p,o){
@@ -2694,7 +2726,7 @@ function trSizeChart(list){
     fit:function(ps){ var f=ols(ps.filter(function(p){return p.solid;}).map(function(p){return [p.x,Math.log10(p.y)];})); if(!f) return null; var months=f.b>0?12*Math.log10(2)/f.b:0;
       var t0=Math.floor(d3.max(ps,function(p){return p.solid?p.x:-1/0;})), A=Math.pow(10,f.a+f.b*t0), g=Math.pow(10,f.b);
       return {at:function(x){ return Math.pow(10,f.a+f.b*x); },label:"Fitted on "+f.n+" real runs: "+(f.b>0?"size doubles every "+(months<18?Math.round(months)+" months":(months/12).toFixed(1)+" years"):"no growth in size"),
-        eq:'y = '+cf(A)+' × '+cf(g)+'<sup>t\u2009\u2212\u2009'+t0+'</sup>, y in billions of parameters, t in years · '+r2(f)+' on the log scale'}; }});
+        tip:'<b>Fitted on '+f.n+' real runs</b><span class="n">y = '+cf(A)+' × '+cf(g)+'<sup>t\u2009\u2212\u2009'+t0+'</sup></span><span class="n">'+r2(f)+' on the log scale</span><small>y in billions of parameters, t in years</small>'}; }});
 }
 function trEffChart(list){
   var pts=list.filter(function(r){return r.dist&&r.eff;}).map(function(r){ return {id:r.id,x:r.dist,y:r.eff,k:r.k,solid:r.ev==="real",name:r.name}; });
@@ -2702,10 +2734,11 @@ function trEffChart(list){
   if(pts.length<2){ $("tEff").innerHTML='<p class="empty">Too few runs state both a distance and an efficiency.</p>'; $("tEff")._c=null; return; }
   var lo=Math.pow(10,Math.floor(Math.log10(d3.min(pts,function(p){return p.x;})))), hi=Math.pow(10,Math.ceil(Math.log10(d3.max(pts,function(p){return p.x;}))));
   var ymin=Math.max(0,Math.floor((d3.min(pts,function(p){return p.y;})-2)/5)*5);
-  scatterChart($("tEff"),{label:"Efficiency each source states, by distance between sites",ytitle:"Efficiency against the same run at one site",xtitle:"Distance between the farthest sites, km, log scale",points:pts,xlog:true,xdom:[lo,hi],xfmt:function(v){ var l=Math.log10(v); return Math.abs(l-Math.round(l))<1e-6?fmtN(v)+(v===hi?" km":""):""; },ydom:[ymin,100],yfmt:function(v){return v+"%";},left:44,
+  scatterChart($("tEff"),{label:"Efficiency each source states, by link distance",ytitle:"Efficiency against the same run at one site",xtitle:"Link distance as each source gives it, km, log scale",points:pts,xlog:true,xdom:[lo,hi],xfmt:function(v){ var l=Math.log10(v); return Math.abs(l-Math.round(l))<1e-6?fmtN(v)+(v===hi?" km":""):""; },ydom:[ymin,100],yfmt:function(v){return v+"%";},left:44,
     tipVal:function(p){ return fmtN(Math.round(p.x))+" km · "+sig4(p.y)+"%"; },
-    fit:function(ps){ var f=ps.length>=10?ols(ps.map(function(p){return [Math.log10(p.x),p.y];})):null; if(!f) return null; return {at:function(x){ return f.a+f.b*Math.log10(x); },label:"Fitted on "+f.n+" runs: "+Math.abs(f.b).toFixed(1)+" points "+(f.b<0?"lost":"gained")+" per tenfold distance",
-        eq:'y = '+cf(f.a)+(f.b<0?' \u2212 ':' + ')+cf(Math.abs(f.b))+' log<sub>10</sub> x, y in per cent, x in km · '+r2(f)}; }});
+    fit:function(ps){ var f=ps.length>=5?ols(ps.map(function(p){return [Math.log10(p.x),p.y];})):null; if(!f) return null; var pts=Math.abs(f.b), u=pts.toFixed(1)==="1.0"?"point":"points";
+      return {at:function(x){ return f.a+f.b*Math.log10(x); },label:"Fitted on "+f.n+" runs: "+pts.toFixed(1)+" "+u+" "+(f.b<0?"lost":"gained")+" per tenfold distance"+(f.r2<.3?", a weak fit":""),
+        tip:'<b>Fitted on '+f.n+' runs</b><span class="n">y = '+cf(f.a)+(f.b<0?' \u2212 ':' + ')+cf(pts)+' log<sub>10</sub> x</span><span class="n">'+r2(f)+'</span><small>y in per cent, x in km</small>'}; }});
 }
 /* Runs per year, stacked by coordination; a year under the pointer lights up its runs in the charts above. */
 function trYears(list){
@@ -2742,7 +2775,7 @@ function trYear(v,c,rows,x,stick){
 /* Leaderboards: bars grow to their share of the leader. */
 function trBoards(){
   var real=trList().filter(function(r){return r.k!==3;});
-  var defs=[{t:"Largest models",u:"Parameters",f:"params",v:fmtParams,s:""},{t:"Longest links",u:"Kilometres between the farthest sites",f:"dist",v:function(v){return fmtN(Math.round(v));},s:"km"},{t:"Most owners",u:"Organisations or people contributing",f:"owners",v:fmtN,s:""},{t:"Most nodes",u:"Machines or devices taking part, as each source counts them",f:"nodes",v:fmtN,s:""},{t:"Most accelerators",u:"GPUs, TPUs and other AI chips, with the type each source names",f:"gpus",v:fmtN,s:"chips",sub:function(r){ return r.chips?r.chips.charAt(0).toUpperCase()+r.chips.slice(1):"Chip type not stated"; }}];
+  var defs=[{t:"Largest models",u:"Parameters",f:"params",v:fmtParams,s:""},{t:"Longest links",u:"Link distance in kilometres, as each source gives it",f:"dist",v:function(v){return fmtN(Math.round(v));},s:"km"},{t:"Most owners",u:"Organisations or people contributing",f:"owners",v:fmtN,s:""},{t:"Most nodes",u:"Machines or devices taking part, as each source counts them",f:"nodes",v:fmtN,s:""},{t:"Most accelerators",u:"GPUs, TPUs and other AI chips, with the type each source names",f:"gpus",v:fmtN,s:"chips",sub:function(r){ return r.chips?r.chips.charAt(0).toUpperCase()+r.chips.slice(1):"Chip type not stated"; }}];
   var el=$("recs"), h="";
   defs.forEach(function(d){
     var top=real.filter(function(r){return r[d.f];}).sort(function(a,b){return b[d.f]-a[d.f];}).slice(0,5); if(!top.length) return;
@@ -2763,6 +2796,26 @@ function trSelect(){
     var inChart=c&&c.data.some(function(p){return p.id===TR.sel;}), r=TR.sel&&inChart?trRun(TR.sel):null;
     pk.innerHTML=r?trCard(r):""; pk.classList.toggle("on",!!r); });
 }
+/* What a run is, in one glance, with the way to the map and to the full record. */
+function peekFacts(r){ var f=[]; if(r.params) f.push(fmtParams(r.params)+" parameters"); if(r.gpus) f.push(fmtN(r.gpus)+(r.gpus===1?" accelerator":" accelerators")); if(r.dist) f.push(fmtN(Math.round(r.dist))+" km"); if(r.eff) f.push(sig4(r.eff)+"% efficiency"); if(r.owners) f.push(plural(r.owners,"owner")); if(r.nodes) f.push(plural(r.nodes,"node")); return f; }
+function peekActs(r){ return '<div class="tcard-a">'+(r.placed&&r.placed.length?'<button type="button" class="btn primary" data-trmap="'+esc(r.id)+'">Show on the map</button>':'')+'<button type="button" class="btn quiet" data-run="'+esc(r.id)+'">Full record</button></div>'; }
+/* A leaderboard row opens in place; a second tap, or another row, closes it. */
+function boardPeek(btn){
+  var li=btn.closest("li"), open=li.querySelector(".bpeek"), r=trRun(btn.getAttribute("data-trun"));
+  Array.prototype.forEach.call(btn.closest(".board").querySelectorAll(".bpeek"),function(p){ p.previousElementSibling&&p.previousElementSibling.setAttribute("aria-expanded","false"); p.remove(); });
+  if(open||!r) return;
+  btn.setAttribute("aria-expanded","true");
+  btn.insertAdjacentHTML("afterend",'<div class="bpeek"><span class="tcard-m">'+esc(fmtDate(r))+' · '+esc(evLabel(r))+'</span>'+(peekFacts(r).length?'<span class="tcard-f n">'+esc(peekFacts(r).join(" · "))+'</span>':'')+peekActs(r)+'</div>');
+}
+/* A headline tile opens its run just under the tiles. */
+function tilePeek(id){
+  var el=$("trTilePick"), r=id?trRun(id):null, same=el.getAttribute("data-id")===id;
+  Array.prototype.forEach.call(document.querySelectorAll("#trTiles .tile"),function(t){ t.setAttribute("aria-expanded",String(!!r&&!same&&t.getAttribute("data-trun")===id)); });
+  if(!r||same){ el.innerHTML=""; el.classList.remove("on"); el.removeAttribute("data-id"); return; }
+  el.setAttribute("data-id",id);
+  el.innerHTML='<div class="tcard" style="--c:'+kcol(r.k)+'"><div class="tcard-h"><i class="kd" style="--c:'+kcol(r.k)+'"></i><span>'+(r.k>=0?KLAB[r.k]:"")+'</span><button type="button" class="tx" data-trtclose aria-label="Close">'+'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button></div><b class="tcard-t">'+esc(r.name)+'</b><span class="tcard-m">'+esc(r.org)+' · '+fmtDate(r)+' · '+esc(evLabel(r))+'</span>'+(peekFacts(r).length?'<span class="tcard-f n">'+esc(peekFacts(r).join(" · "))+'</span>':'')+peekActs(r)+'</div>';
+  el.classList.add("on");
+}
 function renderCharts(){ if(S.view!=="trends"||!S.runs.length||!window.d3) return; var l=trList(); trSizeChart(l); trEffChart(l); trYears(l); trSelect(); }
 function renderTrends(){
   var has=S.runs.length>0, body=$("trBody"), wait=$("trWait");
@@ -2776,12 +2829,16 @@ function renderTrends(){
 }
 (function(){
   $("v-trends").addEventListener("click",function(e){
-    var t=e.target.closest("[data-trun],[data-trk],[data-trmap],[data-trclose]"); if(!t) return;
-    if(t.hasAttribute("data-trun")){ TR.sel=t.getAttribute("data-trun"); trSelect(); var card=document.querySelector(".tpick.on"); if(card) intoView(card.closest(".tchart")); }
+    var nt=e.target.closest(".tfit-note.on"); if(nt&&nt._c){ var c=nt._c, P=c.fitPx; if(P&&P.length){ var q=P[Math.max(0,P.length-3)]; var on=!!c.fpin; fitTip(c,on?null:q,!on); } return; }
+    var t=e.target.closest("[data-trun],[data-trk],[data-trmap],[data-trclose],[data-trtclose]"); if(!t) return;
+    if(t.hasAttribute("data-trun")&&t.closest(".board")) boardPeek(t);
+    else if(t.hasAttribute("data-trun")) tilePeek(t.getAttribute("data-trun"));
+    else if(t.hasAttribute("data-trtclose")) tilePeek(null);
     else if(t.hasAttribute("data-trk")){ var k=+t.getAttribute("data-trk"); TR.kind=TR.kind===k?-1:k; renderTrends(); }
     else if(t.hasAttribute("data-trmap")){ location.hash="map/"+encodeURIComponent(t.getAttribute("data-trmap")); }
     else if(t.hasAttribute("data-trclose")){ TR.sel=null; trSelect(); }
   });
+  $("v-trends").addEventListener("keydown",function(e){ var nt=e.target.closest&&e.target.closest(".tfit-note.on"); if(nt&&(e.key==="Enter"||e.key===" ")){ e.preventDefault(); nt.click(); } else if(e.key==="Escape"){ ["tSize","tEff"].forEach(function(id){ var c=$(id)._c; if(c) fitTip(c,null); }); } });
   var rz; window.addEventListener("resize",function(){ clearTimeout(rz); rz=setTimeout(renderCharts,150); });
 })();
 
@@ -3134,7 +3191,7 @@ document.addEventListener("click",function(e){
   else if(t.hasAttribute("data-tick")) tick(t.getAttribute("data-tick"),true);
   else if(t.hasAttribute("data-fmt")){ S.fmt=t.getAttribute("data-fmt"); Array.prototype.forEach.call(document.querySelectorAll("[data-fmt]"),function(b){b.setAttribute("aria-pressed",String(b===t));}); writeDraft(); }
   else if(t.hasAttribute("data-arch")){ var a=S.reports.filter(function(r){return r.id===t.getAttribute("data-arch");})[0]; if(a){ showDraft({title:a.title,md:a.md,count:a.count},"Saved "+longDate(new Date(a.date)),true); if(!roomy()) intoView($("paper")); } }
-  else if(t.hasAttribute("data-write")){ S.draft=null; if(S.view==="reports") writeDraft(); else location.hash="reports"; }
+  else if(t.hasAttribute("data-write")){ S.draft=null; if(S.view==="reports"){ writeDraft(); toast("Draft written from the record as it stands."); } else location.hash="reports"; }
   else if(t.id==="backBtn") $("app").removeAttribute("data-open");
   else if(t.id==="retryBtn"&&db) subscribe();
   else if(t.id==="polishBtn") polish();
