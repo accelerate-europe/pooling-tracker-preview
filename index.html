@@ -777,6 +777,8 @@ html.mdragging,html.mdragging *{cursor:grabbing!important;-webkit-user-select:no
 .mjlist{display:grid;gap:8px;margin-top:14px}
 .mjrow{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:10px 12px;border-radius:14px;background:var(--panel);box-shadow:0 0 0 1px var(--line);text-align:left}
 .mjrow:hover{box-shadow:0 0 0 1px var(--edge)}
+/* A row that opens a list points sideways, as the company rows do. */
+.mjrow .chev{flex:none;width:16px;height:16px;transform:rotate(-90deg);color:var(--ink3)}
 .mjk{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--hot) 16%,var(--panel));color:var(--ink);font:750 13px/1 var(--read)}
 .mjt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.mjt b{font:650 15.5px/1.25 var(--read)}.mjt span{font-size:13px;line-height:1.35;color:var(--ink3)}
 .mjhead{display:flex;align-items:center;gap:14px;margin:6px 0 14px}
@@ -935,18 +937,11 @@ a.est:hover span{color:var(--ink);background:var(--line2)}
 #mCoLab.far .mco.sel i{transform:scale(1.4)}
 
 /* Company shelves: one per type, swiped sideways, one card at a time */
-.mcoshelf{margin-top:6px}
-.mcosh{display:flex;align-items:center;justify-content:space-between;gap:8px}.mcosh .mlab{margin:10px 0 6px}
-.mcosh .link{min-height:36px;padding:0 4px;font-size:13.5px;font-weight:650}
-.mcotrack{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 -16px;padding:2px 16px 8px;scroll-padding:0 16px;overscroll-behavior-x:contain}
-.mcotrack::-webkit-scrollbar{display:none}
-.mcocard{flex:0 0 clamp(140px,38%,190px);scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-height:118px;padding:12px;border-radius:12px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);text-align:left}
-.mcocard b{font:700 14.5px/1.25 var(--read);color:var(--ink)}
-.mcocard small{font-size:12px;color:var(--ink3)}
-.mcocard .w{font-size:12.5px;line-height:1.35;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.mcocard .rb{margin-top:auto;padding:1px 7px;border-radius:9px;background:var(--sunk);font-size:11.5px;font-weight:650;color:var(--ink2)}
-.mcocard:active{background:var(--sunk)}
-@media (hover:hover){.mcocard:hover{box-shadow:inset 0 0 0 1px var(--ink3)}}
+/* Companies list as Regulation does: one row per type, opening a list of companies */
+.mjk.cot{background:color-mix(in srgb,var(--co-c) 24%,var(--panel))}
+.mjk.cot .cosq{width:16px;height:16px;border-radius:5px}
+.mjhead .mjk{width:52px;height:52px;border-radius:14px}
+.mcorow .rb{flex:none;padding:1px 7px;border-radius:9px;background:var(--sunk);font-style:normal;font-size:11.5px;font-weight:650;color:var(--ink2);white-space:nowrap}
 
 .bfoot{display:flex;justify-content:center;gap:6px;padding:2px 0 6px}.bfoot .btop{margin:0}
 
@@ -961,10 +956,10 @@ a.est:hover span{color:var(--ink);background:var(--line2)}
 .bwhy span{flex:1;min-width:0}
 .bwhy svg:last-child{width:15px;height:15px;color:var(--ink3)}
 .bwhy:active{background:var(--line)}
-.bstats{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 -16px;padding:2px 16px 6px;scroll-padding:0 16px;overscroll-behavior-x:contain}
-.bstats::-webkit-scrollbar{display:none}
-.bst{container-type:inline-size;flex:0 0 clamp(116px,32%,150px);scroll-snap-align:start;display:flex;flex-direction:column;gap:4px;min-width:0;min-height:82px;padding:11px 11px 10px;border-radius:12px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);text-decoration:none;transition:box-shadow .16s var(--ease),transform .12s var(--ease)}
-.bst.bgrow{flex-basis:clamp(170px,48%,220px)}
+/* The record's figures sit in a grid on every screen, the growth estimate across the top: nothing runs off the edge to be swiped. */
+.bstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:2px 0 4px}
+.bst{container-type:inline-size;display:flex;flex-direction:column;gap:4px;min-width:0;min-height:82px;padding:11px 11px 10px;border-radius:12px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);text-decoration:none;transition:box-shadow .16s var(--ease),transform .12s var(--ease)}
+.bst.bgrow{grid-column:1/-1}
 .bst:active{transform:scale(.98)}
 .bst b{font:800 min(22px,17cqi)/1.1 var(--read);letter-spacing:-.025em;white-space:nowrap}
 .bst span{font-size:12.5px;line-height:1.3;color:var(--ink3)}
@@ -976,9 +971,7 @@ a.est:hover span{color:var(--ink);background:var(--line2)}
 @media (max-width:719px){ .mfpanel.mwhy{transform:translateY(100%);opacity:1;transition:transform .3s var(--ease)} .mfilt.on .mfpanel.mwhy{transform:none} }
 .mwhy .bsrc{margin-top:14px}
 .mbrief.wide{gap:8px;padding:14px;border-radius:14px;background:var(--sunk)}
-.mbrief.wide .bstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible;margin:4px 0 0;padding:0}
-.mbrief.wide .bst{flex:none}
-.mbrief.wide .bst.bgrow{grid-column:1/-1}
+.mbrief.wide .bstats{margin:4px 0 0}
 @media (hover:hover){ .bst:hover{box-shadow:inset 0 0 0 1px var(--ink3)} .bwhy:hover{background:var(--line2)} }
 
 /* The why text as a field above the map on large screens */
@@ -990,13 +983,16 @@ a.est:hover span{color:var(--ink);background:var(--line2)}
   .mwrap>.mapbox{grid-column:1;grid-row:2}
   .mwrap>.mpanel{grid-column:2;grid-row:1/-1}
 }
-.mfhd{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;padding:0 24px;font:600 13px/1.2 var(--read);letter-spacing:.01em;color:var(--ink3);text-align:left;transition:color .16s var(--ease)}
+.mfhd{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;padding:0 20px 0 24px;font:650 14px/1.2 var(--read);letter-spacing:.005em;color:var(--ink);text-align:left;transition:color .16s var(--ease)}
 .mfhd svg{flex:none;width:15px;height:15px}
 .mfhd svg:first-child{color:var(--hot-d)}
-.mfhd span{flex:1;min-width:0}
+.mfhd>span:not(.mfgo){flex:1;min-width:0}
+/* Folded by default, so the control that opens it has to read as one. */
+.mfgo{flex:none;display:inline-flex;align-items:center;gap:4px;padding:5px 10px 5px 12px;border-radius:999px;background:color-mix(in srgb,var(--hot) 15%,var(--panel));color:var(--hot-d);font:650 12.5px/1 var(--read);letter-spacing:0;transition:background .16s var(--ease)}
+@media (hover:hover){ .mfhd:hover .mfgo{background:color-mix(in srgb,var(--hot) 26%,var(--panel))} }
 .mfhd svg:last-child{width:14px;height:14px}
 @media (hover:hover){ .mfhd:hover{color:var(--ink)} }
-.mfield[data-f="1"] .mfhd{color:var(--ink2)}
+
 .mfbody{padding:2px 24px 18px}
 .mfbody .bb{font-size:15.5px;line-height:1.6;color:var(--ink);margin:0 0 12px;break-inside:avoid}
 .mfbody .blink,.mwhy .blink{display:inline;padding:5px 0;font:inherit;color:var(--ink);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--hot) 70%,transparent);text-decoration-thickness:1.5px;text-underline-offset:3px}
@@ -1403,7 +1399,7 @@ function str(v){ return typeof v==="string"?v:""; }
 var MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
 function longDate(d){ return isNaN(d)?"":d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear(); }
 function dayMonth(iso){ var p=str(iso).slice(0,10).split("-"); return p.length===3&&MONTHS[+p[1]-1]?(+p[2])+" "+MONTHS[+p[1]-1]:""; }
-function plural(n,w){ return n+" "+w+(n===1?"":"s"); }
+function plural(n,w){ return n+" "+(n===1?w:w.replace(/([^aeiou])y$/,"$1ie")+"s"); }
 function wide(){ return window.matchMedia("(min-width:720px)").matches; }
 function roomy(){ return window.matchMedia("(min-width:900px)").matches; }
 function canWrite(){ return !!db&&!S.dead&&!SNAP; }
@@ -2598,11 +2594,12 @@ function regPlace(){ if(MP.layer!=="reg"||!MP.t||!PROJ) return; var sz=mapSize()
     for(var k=0;k<6;k++){ var hit=done.filter(function(d){ return Math.abs(d[0]-x)<(d[2]+w)/2+4&&Math.abs(d[1]-y)<(d[3]+h)/2+4; })[0]; if(!hit) break; y=hit[1]+(hit[3]+h)/2+6; }
     done.push([x,y,w,h]); el.style.transform="translate("+x.toFixed(1)+"px,"+y.toFixed(1)+"px) translate(-50%,-50%)"; }); }
 function setLayer(l){
-  if(MP.layer===l) return; MP.layer=l; MP.jur=""; MP.coSel=""; MP.coCl=null; MP.whyOther=false; chooser(null);
+  if(MP.layer===l) return; MP.layer=l; MP.jur=""; MP.coSel=""; MP.coCl=null; MP.coAll=""; chooser(null);
   if(l!=="runs"){ if(MP.run){ MP.run=null; } MP.ctry=""; setHover(""); $("mTip").classList.remove("on"); }
   try{ history.replaceState(null,"",l==="co"?"#map/c":"#map"); }catch(e){}
   $("v-map").classList.toggle("reg",l==="reg"); $("v-map").classList.toggle("co",l==="co"); $("mPanel").setAttribute("aria-label",l==="reg"?"Regulation":l==="co"?"Companies":"Training runs");
-  regPaint(); renderPanel(); paint(); coPaint(); if(l==="runs") flyView(false,declutter); else if(MP.built) flyTo(fitT(boxOf(MREG.world)),false,declutter); /* everything in view */
+  /* The map stays where it is: switching layers changes what is drawn, not the view. */
+  regPaint(); renderPanel(); paint(); coPaint(); declutter();
 }
 function pickJur(j){
   if(MP.jur===j) return; MP.jur=j; if(j){ MP.reg=""; MP.area=""; regChips(); } regPaint(); renderPanel();
@@ -2698,24 +2695,25 @@ function briefHtml(){
   /* Epoch's growth estimate leads: it is the trend the record sits in. */
   var tiles=(eg?st(fmtN(eg.value)+"×","yearly growth of decentralised training compute"+(efr?", against "+fmtN(efr.value)+"× at the frontier (Epoch AI)":" (Epoch AI)"),"#knowledge/methods/epoch","bgrow"):"")+
     st(fmtN(real.length),"demonstrated runs")+(big?st(fmtParams(big.params),"largest demonstrated model"):"")+(far?st(fmtN(Math.round(far.dist))+" km","longest demonstrated link"):"")+(slow?st(fmtLink(slow.link),"slowest demonstrated link"):"");
-  var md=briefMode(), lead=md==="over"?"":md==="wide"?whyHtml():'<button type="button" class="bwhy" data-mwhy aria-haspopup="dialog">'+INFO+'<span>What is this tracker?</span>'+UPARR+'</button>';
+  var md=briefMode(), lead=md==="over"?"":'<button type="button" class="bwhy" data-mwhy aria-haspopup="dialog">'+INFO+'<span>What is this tracker?</span>'+UPARR+'</button>';
   return '<section class="mbrief'+(md==="phone"?"":" wide")+'" data-bmode="'+md+'" aria-label="In brief">'+lead+'<div class="bstats">'+tiles+'</div></section>';
 }
 /* Where the why text goes: on a large screen it is a field above the map, open at first and folded by its arrow
    (remembered in the browser); on a short wide screen it sits in the panel; on a phone it waits behind the button. */
 function briefMode(){ return window.matchMedia("(min-width:900px) and (min-height:600px)").matches?"over":side()?"wide":"phone"; }
-var WHYOFF="dtt-why-folded";
-function whyFolded(){ try{ return localStorage.getItem(WHYOFF)==="1"; }catch(e){ return false; } }
+/* Folded until a reader opens it; the choice is remembered in the browser. */
+var WHYON="dtt-why-open";
+function whyOpen(){ try{ return localStorage.getItem(WHYON)==="1"; }catch(e){ return false; } }
 var DOWNARR='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 5 5 5-5"/></svg>';
 function syncOver(){
   var o=$("mOver"), b=document.querySelector("#mBody .mbrief"); if(!o) return;
   if(b&&b.getAttribute("data-bmode")!==briefMode()){ var t=document.createElement("div"); t.innerHTML=briefHtml(); if(t.firstChild) b.replaceWith(t.firstChild); b=document.querySelector("#mBody .mbrief"); }
-  /* In the Runs layer it follows the brief and the remembered fold; over Companies and Regulation it waits folded until opened. */
-  var other=whyOtherLayer(), on=briefMode()==="over"&&S.view==="map"&&(!!b||other), f=other?!MP.whyOther:whyFolded();
+  /* One field for every layer and every panel, so switching layers or opening a run never changes the map's size. */
+  var on=briefMode()==="over"&&S.view==="map", f=!whyOpen();
   var want=on?(f?"f":"o"+S.runs.length+"."+(S.companies||[]).length+"."+(S.rules||[]).length):"off";
   if(o.getAttribute("data-st")===want) return;
   o.setAttribute("data-st",want); o.hidden=!on; o.setAttribute("data-f",f?"1":"0");
-  if(on) o.innerHTML='<button type="button" class="mfhd" data-mfield aria-expanded="'+(!f)+'" aria-controls="mFieldBody">'+INFO+'<span>What is this tracker?</span>'+(f?DOWNARR:UPARR)+'</button>'+
+  if(on) o.innerHTML='<button type="button" class="mfhd" data-mfield aria-expanded="'+(!f)+'" aria-controls="mFieldBody">'+INFO+'<span>What is this tracker?</span><span class="mfgo">'+(f?'Show':'Hide')+(f?DOWNARR:UPARR)+'</span></button>'+
     (f?'':'<div class="mfbody" id="mFieldBody">'+whyHtml()+'</div>');
   /* The field takes height from the map, so the map is measured and fitted again. */
   if(MP.built) window.dispatchEvent(new Event("resize"));
@@ -2893,7 +2891,7 @@ function play(){
   /* The brief's button opens its sheet; Done, the backdrop, Escape or a link inside closes it. */
   $("mBody").addEventListener("click",function(e){ if(e.target.closest("[data-mwhy]")) openWhy(); });
   new MutationObserver(syncOver).observe($("mBody"),{childList:true});
-  $("mOver").addEventListener("click",function(e){ if(!e.target.closest("[data-mfield]")) return; if(whyOtherLayer()) MP.whyOther=!MP.whyOther; else{ try{ localStorage.setItem(WHYOFF,whyFolded()?"0":"1"); }catch(x){} } syncOver(); var nb=$("mOver").querySelector("[data-mfield]"); if(nb) nb.focus({preventScroll:true}); });
+  $("mOver").addEventListener("click",function(e){ if(!e.target.closest("[data-mfield]")) return; try{ localStorage.setItem(WHYON,whyOpen()?"0":"1"); }catch(x){} syncOver(); var nb=$("mOver").querySelector("[data-mfield]"); if(nb) nb.focus({preventScroll:true}); });
   $("mWhy").addEventListener("click",function(e){ if(e.target.id==="mWhy"||e.target.closest("[data-mwhyclose],[data-kbrule],a[href]")) closeWhy(); });
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeWhy(); });
   v.addEventListener("input",function(e){ if(e.target.id!=="mQ") return; clearTimeout(MP.qT); MP.qT=setTimeout(function(){ if(MP.layer==="co"){ MP.coQ=$("mQ").value.trim(); renderPanel(true); return; } MP.q=$("mQ").value.trim(); MP.more=false; renderPanel(true); if(MP.built) paint(); },150); });
@@ -3714,7 +3712,10 @@ function coCluster(ids){ var m=ids.map(coBy).filter(Boolean); if(!m.length) retu
   if(b[2]-b[0]<.6&&b[3]-b[1]<.6){ MP.coCl=m.map(function(c){return c.id;}); MP.coSel=""; renderPanel(); if(!side()&&MP.detent==="peek") setDetent("half"); return; }
   flyTo(fitT(b,4,true),false,function(){ coPaint(); declutter(); }); }
 
-function coRow(c){ return '<button type="button" class="mcorow" data-mco="'+esc(c.id)+'"><i class="cosq t-'+c.type+'"></i><span><b>'+esc(c.name)+'</b><small>'+esc([c.city,c.country].filter(Boolean).join(", "))+'</small></span>'+CHEV+'</button>'; }
+/* A company as a row: name, place and what it makes, with its runs counted. */
+function coRow(c){ var n=coRuns(c).length, what=(c.products[0]||"").split(/[.;]/)[0];
+  return '<button type="button" class="mcorow" data-mco="'+esc(c.id)+'"><i class="cosq t-'+c.type+'"></i><span><b>'+esc(c.name)+'</b><small>'+esc([c.city,c.country].filter(Boolean).join(", ")+(what?" · "+what:""))+'</small></span>'+(n?'<em class="rb">'+plural(n,"run")+'</em>':'')+CHEV+'</button>'; }
+function coSum(part){ var r=part.filter(function(x){ return coRuns(x).length; }).length; return plural(part.length,"company")+(r?" · "+r+" with runs in the record":""); }
 function coHtml(){
   var c=MP.coSel?coBy(MP.coSel):null;
   if(c) return coCard(c);
@@ -3724,18 +3725,17 @@ function coHtml(){
   if(sub){ var city=sub[0]?(sub[0].city||sub[0].country):""; h+='<button type="button" class="mback" data-mcoall>'+BACK+'All companies</button><p class="mlab">'+plural(sub.length,"company")+(city?" in "+esc(city):"")+'</p><div class="mcolist">'+sub.map(coRow).join("")+'</div>'; return h; }
   if(!list.length) return h+'<p class="empty">'+(MP.coQ?"The search finds no company.":"This filter leaves the list empty.")+'</p>';
   var of=function(t){ return list.filter(function(x){ return x.type===t||x.also===t; }); };
-  /* A type opened from its shelf, or any search or filter, lists the matches flat. */
-  if(MP.coAll){ var part=of(MP.coAll).sort(coRank); return h+'<button type="button" class="mback" data-mcoshelf="">'+BACK+'All companies</button><p class="mlab"><i class="cosq t-'+MP.coAll+'"></i>'+COT[MP.coAll]+' <span class="n">'+part.length+'</span></p><div class="mcolist">'+part.map(coRow).join("")+'</div>'; }
+  /* A type opened from its row lists its companies, those with most runs on the record first. */
+  if(MP.coAll){ var part=of(MP.coAll).sort(coRank); return h+'<button type="button" class="mback" data-mcoshelf="">'+BACK+'All companies</button><div class="mjhead"><span class="mjk cot t-'+MP.coAll+'"><i class="cosq"></i></span><div><h2>'+COT[MP.coAll]+'</h2><p>'+esc(coSum(part))+'</p></div></div><div class="mcolist">'+part.map(coRow).join("")+'</div>'; }
+  /* A search or a filter lists the matches under their type. */
   if(MP.coQ||MP.coT||MP.area){ ["software","network"].forEach(function(t){ var part=list.filter(function(x){ return x.type===t; }); if(!part.length) return; h+='<p class="mlab"><i class="cosq t-'+t+'"></i>'+COT[t]+' <span class="n">'+part.length+'</span></p><div class="mcolist">'+part.map(coRow).join("")+'</div>'; }); return h; }
-  /* Otherwise one shelf per type, swiped sideways, the companies with most runs on the record first. */
-  ["software","network"].forEach(function(t){ var part=of(t).sort(coRank); if(!part.length) return;
-    h+='<div class="mcoshelf"><div class="mcosh"><p class="mlab"><i class="cosq t-'+t+'"></i>'+COT[t]+' <span class="n">'+part.length+'</span></p><button type="button" class="link" data-mcoshelf="'+t+'">See all</button></div><div class="mcotrack">'+part.map(function(c){ var n=coRuns(c).length, what=(c.products[0]||c.role||"").split(/[.;]/)[0];
-      return '<button type="button" class="mcocard" data-mco="'+esc(c.id)+'"><b>'+esc(c.name)+'</b><small>'+esc([c.city,c.country].filter(Boolean).join(", "))+'</small>'+(what?'<span class="w">'+esc(what)+'</span>':'')+(n?'<span class="rb">'+plural(n,"run")+'</span>':'')+'</button>'; }).join("")+'</div></div>'; });
-  return h;
+  /* Otherwise one row per type, as the Regulation layer lists its jurisdictions. */
+  return h+'<div class="mjlist">'+["software","network"].map(function(t){ var part=of(t); if(!part.length) return "";
+    return '<button type="button" class="mjrow" data-mcoshelf="'+t+'"><span class="mjk cot t-'+t+'"><i class="cosq"></i></span><span class="mjt"><b>'+COT[t]+'</b><span>'+esc(coSum(part))+'</span></span>'+CHEV+'</button>'; }).join("")+'</div>';
 }
 function coRank(a,b){ return coRuns(b).length-coRuns(a).length||(a.name.toLowerCase()<b.name.toLowerCase()?-1:1); }
 function coCard(c){
-  var h='<button type="button" class="mback" data-mco="">'+BACK+'All companies</button>';
+  var h='<button type="button" class="mback" data-mco="">'+BACK+(MP.coAll&&!MP.coCl?COT[MP.coAll]:'All companies')+'</button>';
   h+='<div class="mhead"><span class="mk"><i class="cosq t-'+c.type+'"></i>'+COT[c.type]+(c.also?' · '+COT[c.also]:"")+'</span><h2 class="mt">'+esc(c.name)+'</h2><p class="mo">'+esc([c.city,c.country].filter(Boolean).join(", "))+'</p>'+(c.prec==="region"?'<span class="meta"><span class="chip conflict">Placed by region</span></span>':c.prec==="registered"?'<span class="meta"><span class="chip">Registered office</span></span>':c.prec==="office"?'<span class="meta"><span class="chip">Office, not headquarters</span></span>':"")+'</div>';
   if(c.role) h+='<p class="mnote">'+esc(c.role)+'</p>';
   if(c.products.length) h+='<p class="mlab">Products</p><div class="kprods">'+c.products.map(function(p){ return '<span class="kchip static">'+esc(p)+'</span>'; }).join("")+'</div>';
