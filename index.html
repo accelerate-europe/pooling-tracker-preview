@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>Distributed Training Tracker</title>
+<script>(function(){ var r=document.documentElement; window.__hostTheme=r.getAttribute("data-theme")||""; try{ var t=localStorage.getItem("dtt-theme"); if(t==="light"||t==="dark") r.setAttribute("data-theme",t); }catch(e){} })();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
@@ -51,6 +52,7 @@
   --sea:#12100F; --land:#2E2A27; --bord:rgba(250,247,242,.08); --coast:#47413B; --arc:rgba(195,150,116,.40); --dot:#C39674; --map-ink:#FAF7F2;
   color-scheme:dark;
 }
+:root[data-theme="light"]{color-scheme:light}
 *{box-sizing:border-box}
 html,body{height:100%;overflow:hidden;overflow:clip}
 body{margin:0;overflow:hidden;background:var(--ground);color:var(--ink);font:16px/1.5 var(--ui);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
@@ -397,6 +399,13 @@ html.public .pvbar>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:479px){ html.public .pvbar .pv-l{display:none} }
 @media (max-width:719px){ html.public .pvbar{padding-left:14px;padding-right:6px;font-size:12.5px} }
 /* feedback, public build only */
+/* Appearance: one button that cycles Match device, Light and Dark; its icon shows the setting */
+.themebtn{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:10px;color:var(--ink2);transition:background .15s var(--ease),color .15s var(--ease)}
+.themebtn svg{width:18px;height:18px}
+.themebtn:hover{background:var(--sunk);color:var(--ink)}
+.themebtn:focus-visible{outline:2px solid var(--hot);outline-offset:1px}
+@media (min-width:900px){ .top{gap:16px} html:not(.share) #writeBtn+.themebtn{margin-left:-6px} }
+@media (min-width:1280px) and (max-width:1399px){ html:not(.share) .tabs a{padding:0 11px} } /* with the appearance button the private header keeps its margin at 1280 px beside the curator line */
 .fbbtn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 10px;border-radius:8px;font-weight:650;color:var(--ink);font-size:13.5px}
 .fbbtn .n{font-size:12px;font-weight:700;color:var(--hot-ink)}
 .fbbar{position:fixed;left:0;right:0;top:0;z-index:30;display:flex;align-items:center;gap:6px;padding:calc(4px + env(safe-area-inset-top,0px)) 8px 4px 16px;background:var(--ink);color:var(--ground);font-weight:600;font-size:14px}
@@ -1162,6 +1171,8 @@ p.bsrc a{display:inline;padding:9px 0;color:var(--ink3);text-decoration:none}
   .chart{padding:16px 14px}
   .tabs a[aria-current="page"]{background:var(--raised);box-shadow:0 1px 2px rgba(0,0,0,.14),0 0 0 .5px var(--line)}
   #writeBtn{display:none}
+  .top{gap:6px;padding-right:8px} /* the appearance button beside five tabs leaves each tab room for its label */
+  .themebtn{width:32px;height:38px}
   #v-inbox{display:block}
   .list{height:100%;border-right:0;padding:22px 16px calc(32px + env(safe-area-inset-bottom,0px))}
   .h1{font-size:28px}
@@ -1224,6 +1235,7 @@ p.bsrc a{display:inline;padding:9px 0;color:var(--ink3);text-decoration:none}
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13h10M4 10.5l6.8-6.8a1.4 1.4 0 0 1 2 2L6 12.5l-2.6.6z"/></svg>
       <span>Write draft</span>
     </button>
+    <button type="button" class="themebtn" id="themeBtn" data-themecycle aria-label="Appearance"></button>
   </header>
 
   <main>
@@ -2046,6 +2058,29 @@ function toast(msg,undo){
   if(undo) $("undoBtn").onclick=function(e){ e.stopPropagation(); hideToast(); undo(); };
   toastT=setTimeout(hideToast,undo?3200:2200);
 }
+/* Appearance: Match device (the default), Light or Dark, chosen with one button in the header that cycles through them.
+   The choice is kept in this browser; the page's colours follow data-theme on the root, and the map, the charts and the corridor
+   repaint on "dtt-theme". What the host page set, if anything, stands for Match device. */
+var THEME={order:["auto","light","dark"],word:{auto:"Match device",light:"Light",dark:"Dark"},
+  icon:{auto:'<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="9" cy="9" r="6.2"/><path d="M9 2.8a6.2 6.2 0 0 0 0 12.4z" fill="currentColor" stroke="none"/></svg>',
+    light:'<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="3.4"/><path d="M9 1.8v1.6M9 14.6v1.6M1.8 9h1.6M14.6 9h1.6M3.9 3.9l1.1 1.1M13 13l1.1 1.1M3.9 14.1 5 13M13 5l1.1-1.1"/></svg>',
+    dark:'<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M14.8 11.2A6.3 6.3 0 0 1 6.8 3.2a6.3 6.3 0 1 0 8 8z"/></svg>'},
+  host:window.__hostTheme||""};
+function themeNow(){ try{ var t=localStorage.getItem("dtt-theme"); return t==="light"||t==="dark"?t:"auto"; }catch(e){ return "auto"; } }
+function themeBtnSync(){ var b=$("themeBtn"); if(!b) return; var t=themeNow(), nx=THEME.order[(THEME.order.indexOf(t)+1)%3];
+  if(b._t!==t){ b._t=t; b.innerHTML=THEME.icon[t]; }
+  var l="Appearance: "+THEME.word[t]+". Switch to "+THEME.word[nx]; b.setAttribute("aria-label",l); b.title=l; }
+function themeApply(t,say){ var r=document.documentElement;
+  try{ if(t==="auto") localStorage.removeItem("dtt-theme"); else localStorage.setItem("dtt-theme",t); }catch(e){}
+  if(t==="auto"){ if(THEME.host) r.setAttribute("data-theme",THEME.host); else r.removeAttribute("data-theme"); } else r.setAttribute("data-theme",t);
+  themeBtnSync(); try{ window.dispatchEvent(new Event("dtt-theme")); }catch(e){}
+  if(say) toast(t==="auto"?"Appearance matches your device":THEME.word[t]+" appearance"); }
+document.addEventListener("click",function(e){ if(!e.target.closest("[data-themecycle]")) return; var t=themeNow(); themeApply(THEME.order[(THEME.order.indexOf(t)+1)%3],true); });
+/* A host that sets the theme later is followed under Match device and overruled by a choice made here. */
+try{ new MutationObserver(function(){ var r=document.documentElement, a=r.getAttribute("data-theme")||"", t=themeNow();
+  if(t==="auto"){ if(a!==THEME.host){ THEME.host=a; window.dispatchEvent(new Event("dtt-theme")); } } else if(a!==t){ THEME.host=a; r.setAttribute("data-theme",t); } }).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]}); }catch(e){}
+try{ var mqT=matchMedia("(prefers-color-scheme: dark)"), onMq=function(){ if(themeNow()==="auto") window.dispatchEvent(new Event("dtt-theme")); }; if(mqT.addEventListener) mqT.addEventListener("change",onMq); else if(mqT.addListener) mqT.addListener(onMq); }catch(e){}
+themeBtnSync();
 (function(){
   var t=$("toast"), x=0, y=0, down=false;
   t.addEventListener("click",function(e){ if(e.target.id!=="undoBtn") hideToast(); });
@@ -2586,6 +2621,7 @@ function buildMap(){
   MP.t=fitT(boxOf(MREG.world)); d3.select("#mapbox").call(ZOOM.transform,MP.t);
   var mq=window.matchMedia("(prefers-color-scheme: dark)"), re=function(){ readColours(); kick(); };
   if(mq.addEventListener) mq.addEventListener("change",re); else if(mq.addListener) mq.addListener(re);
+  window.addEventListener("dtt-theme",re);
   document.addEventListener("visibilitychange",function(){ LAST=0; kick(); });
 }
 function setWorld(){ var w=boxOf(MREG.world), sz=mapSize(); MP.kWorld=Math.min(sz[0]/(w[2]-w[0]),sz[1]/(w[3]-w[1])); if(ZOOM) ZOOM.scaleExtent([MP.kWorld*.85,MP.kWorld*140]); }
@@ -4284,6 +4320,7 @@ window.addEventListener("blur",function(){ CR.keys={}; });
 window.addEventListener("resize",function(){ if(CV.on&&$("kCorr")&&S.view==="database"){ crSize(); crDraw(); } });
 document.addEventListener("visibilitychange",function(){ if(!document.hidden) crKick(); });
 try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change",function(){ if(CV.on){ CR.T=cPal(); torchRest(); crDraw(); crKick(); } }); }catch(e){}
+window.addEventListener("dtt-theme",function(){ CMAPSIG=""; if(CV.on){ CR.T=cPal(); torchRest(); crDraw(); crKick(); } });
 
 /* The Knowledge base draws as before; the corridor shows over it when chosen. An address naming a section always
    opens the list and #knowledge/corridor the corridor, so links, reloads and Back land where they point; reopening
