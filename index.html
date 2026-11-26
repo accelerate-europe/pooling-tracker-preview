@@ -1107,6 +1107,15 @@ p.bsrc a{display:inline;padding:9px 0;color:var(--ink3);text-decoration:none}
 .corr.gone{opacity:0}
 .corr canvas{display:block;width:100%;outline:none;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
 .corr canvas.pt{cursor:pointer}
+/* the open book's light, breathing slowly; the browser animates it, so the corridor itself asks for no frames */
+.caura{position:absolute;left:0;top:0;width:100px;height:100px;margin:-50px 0 0 -50px;pointer-events:none}
+.caura[hidden]{display:none}
+/* faint over the page itself, so the map keeps its colours, and strongest just beyond its edge */
+.caura i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(closest-side,rgba(255,226,190,.14),rgba(255,224,186,.36) 20%,rgba(255,216,176,.42) 32%,rgba(255,210,164,.22) 55%,rgba(255,206,160,.07) 78%,rgba(255,206,160,0));animation:caura 4.6s ease-in-out infinite alternate}
+@keyframes caura{from{opacity:.1;transform:scale(.9)}to{opacity:.3;transform:scale(1.08)}}
+@keyframes caurad{from{opacity:.34;transform:scale(.88)}to{opacity:.72;transform:scale(1.1)}}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .caura i{animation-name:caurad} }
+:root[data-theme="dark"] .caura i{animation-name:caurad}
 .clabs{position:absolute;inset:0;pointer-events:none}
 /* the pill is what shows; the button round it, padded evenly, is the tap target, so neighbouring labels never share one */
 .clab{position:absolute;left:0;top:0;display:block;padding:7px;opacity:0;pointer-events:none;transition:opacity .16s var(--ease);will-change:transform}
@@ -1120,12 +1129,13 @@ p.bsrc a{display:inline;padding:9px 0;color:var(--ink3);text-decoration:none}
 /* the linking book's moment of warm white on the way to the map */
 .clink{position:fixed;inset:0;z-index:60;background:var(--ground);opacity:0;transition:opacity .34s ease;pointer-events:none}
 .clink:not(.on){transition-duration:.55s}
+.clink.quick.on{transition-duration:.16s}
 .clink.on{opacity:1}
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .clink{background:var(--ink)} }
 :root[data-theme="dark"] .clink{background:var(--ink)}
 /* on a short screen the corridor sits a little closer under the search, so more of it fits */
 @media (max-height:520px){ .corr{margin-top:8px} }
-@media (prefers-reduced-motion:reduce){ .kin{animation:none} .corr,.clink{transition:none} }
+@media (prefers-reduced-motion:reduce){ .kin{animation:none} .corr,.clink{transition:none} .caura{display:none!important} }
 
 @media (hover:hover){
   .tabs a:hover{background:var(--line2);color:var(--ink)}
@@ -3922,8 +3932,9 @@ document.addEventListener("keydown",function(e){ if(e.key!=="/"||e.metaKey||e.ct
 
 /* ---------- Knowledge base: the corridor, a second way into the same sections ----------
    A corridor of five bookcases, one per section, drawn on a canvas with its own small camera: Runs and Concepts on
-   the left wall, News and Regulation on the right, Methods at the end with a lectern before it. Every entry is one
-   book. A bookcase, or its label, walks the reader up to it and then gives way to that section's ordinary list.
+   the left wall, News and Regulation on the right, and on the end wall Methods beside a lectern with an open book.
+   Every entry is one book. A bookcase, or its label, walks the reader up to it and then gives way to that section's
+   ordinary list; the open book riffles to its map and gives way to the Map tab.
    The list stays the default; the corridor is chosen with the second icon beside the heading and remembered only
    while the page is open. In dark mode the corridor is unlit and a warm torch follows the pointer. */
 var CV={on:/^#knowledge\/corridor/.test(location.hash),last:"",sig:""};
@@ -3957,29 +3968,36 @@ function cPal(){ var cs=getComputedStyle(document.documentElement), T={tok:funct
   if(!T.dark){
     T.wallN=[240,233,223]; T.wallF=[214,204,190]; T.ceilN=[248,244,238]; T.ceilF=[234,226,215]; T.floorN=[232,222,209]; T.floorF=[205,193,178]; T.end=[226,216,202];
     T.frame=[255,255,255]; T.frameSide=[240,235,228]; T.niche=[236,228,217]; T.plank=[222,212,199]; T.plankEdge=[250,247,242]; T.plankUnder=[205,194,180]; T.pages=[244,237,224];
-    T.fog=[214,204,190]; T.fogK=0.42; T.ao=0.075; T.board=[90,72,56]; T.boardA=0.16; T.bookTo=[30,26,22]; T.bookK=0.12; T.glowA=0.22; T.ink=[96,86,76]; T.inkA=0.32; }
+    T.fog=[214,204,190]; T.fogK=0.42; T.ao=0.075; T.board=[90,72,56]; T.boardA=0.16; T.bookTo=[30,26,22]; T.bookK=0.12; T.ink=[96,86,76]; T.inkA=0.32;
+    T.aura=[248,186,128]; T.wallA=0.24; T.floorA=0.2; }
   else{
     T.wallN=[86,74,64]; T.wallF=[60,52,46]; T.ceilN=[64,56,50]; T.ceilF=[48,42,38]; T.floorN=[78,66,56]; T.floorF=[50,43,38]; T.end=[66,57,50];
     T.frame=[190,174,154]; T.frameSide=[160,145,128]; T.niche=[84,72,62]; T.plank=[132,116,100]; T.plankEdge=[196,180,160]; T.plankUnder=[96,84,72]; T.pages=[226,212,190];
-    T.fog=[44,38,34]; T.fogK=0.35; T.ao=0.16; T.board=[0,0,0]; T.boardA=0.16; T.bookTo=[44,34,26]; T.bookK=0.12; T.glowA=0.10; T.ink=[70,60,50]; T.inkA=0.45; }
+    T.fog=[44,38,34]; T.fogK=0.35; T.ao=0.16; T.board=[0,0,0]; T.boardA=0.16; T.bookTo=[44,34,26]; T.bookK=0.12; T.ink=[70,60,50]; T.inkA=0.45;
+    T.aura=[255,196,140]; T.wallA=0.34; T.floorA=0.3; }
   T.book=function(n){ return cMix(T.tok(n),T.bookTo,T.bookK); };
   return T; }
 
 /* ---- the world, in metres: x across, y up, z away from the entrance ---- */
 var CW=4.4, CHT=3.3, CD=8.6, CZ0=-9, CASEH=2.3, CASED=0.32, CNEAR=0.05, CST=0.04;
-var CASES=[{s:"runs",side:-1,a:0.65,b:3.55},{s:"con",side:-1,a:4.45,b:7.35},{s:"devs",side:1,a:0.65,b:3.55},{s:"reg",side:1,a:4.45,b:7.35},{s:"met",side:0,a:-0.8,b:0.8}];
+/* Methods stands on the left half of the end wall, clear of the Concepts case, so all of it shows from the entrance */
+var CASES=[{s:"runs",side:-1,a:0.65,b:3.55},{s:"con",side:-1,a:4.45,b:7.35},{s:"devs",side:1,a:0.65,b:3.55},{s:"reg",side:1,a:4.45,b:7.35},{s:"met",side:0,a:-1.6,b:-0.25}];
 var CBOARD=[0.10,0.64,1.18,1.72,2.24];
-var CLZ=CD-CASED-0.95;
+/* the lectern stands alone on the right half of the end wall */
+var CLX=1.08, CLZ=CD-0.95;
 var CHOME={x:0,z:-5.1,yaw:0};
 var CR={cam:{x:0,z:-5.1,yaw:0},eye:1.76,hz:0.46,v:{f:0,t:0},keys:{},raf:0,last:0,hover:"",focus:"",tw:null,books:{},hulls:{},T:null,w:0,h:0,F:500,frames:[],
   torch:{x:0,y:0,I:0.4,R:100},tt:{x:0,y:0,I:0.4,R:100,rest:true},page:null,t0:performance.now(),lastDraw:0,moved:false,pitch:0};
 /* a point on a case: u along it as the viewer reads it, y up, d out from the wall */
 function cpt(k,u,y,d){ if(k.side<0) return [-CW/2+d,y,k.a+u]; if(k.side>0) return [CW/2-d,y,k.b-u]; return [k.a+u,y,CD-d]; }
 function clen(k){ return k.b-k.a; }
+/* a point on the open book: x across from the spine, t up the sloping board from its front edge, h out of the board */
+function cBook(x,t,h){ h=h||0; return [CLX+x,0.99+t*0.2+h*0.862,CLZ-0.17+t*0.34-h*0.507]; }
 function toCam(p){ var c=CR.cam, dx=p[0]-c.x, dz=p[2]-c.z, co=Math.cos(c.yaw), si=Math.sin(c.yaw), X=dx*co-dz*si, Y=p[1]-CR.eye, Z=dx*si+dz*co, pt=CR.pitch;
   if(!pt) return [X,Y,Z]; var cp=Math.cos(pt), sp=Math.sin(pt); return [X,Y*cp-Z*sp,Y*sp+Z*cp]; }
-/* walking up to the lectern, the eye drops a little towards the open book */
-function crPitch(){ var c=CR.cam, near=Math.max(0,Math.min(1,(c.z-(CLZ-3.2))/2.2)), facing=Math.max(0,Math.cos(c.yaw)), central=Math.max(0,1-Math.abs(c.x)/1.2); CR.pitch=-0.3*near*near*(3-2*near)*facing*central; }
+/* walking up to the lectern, the eye drops towards the open book, until the book sits a little below the middle of the view */
+function crPitch(){ var c=CR.cam, dx=CLX-c.x, dz=CLZ-c.z, near=Math.max(0,Math.min(1,(c.z-(CLZ-3.4))/2.1)), facing=Math.max(0,Math.cos(c.yaw-Math.atan2(dx,dz))), central=Math.max(0,1-Math.abs(dx)/1.2), s=near*near*(3-2*near)*facing*central;
+  if(!s||!CR.F){ CR.pitch=0; return; } var aim=Math.atan2(CR.eye-1.09,Math.max(0.4,dz))-Math.atan((0.56-CR.hz)*CR.h/CR.F); CR.pitch=-Math.max(0,Math.min(0.62,aim))*s; }
 /* polygons are clipped at a plane just in front of the eye, so walking close never folds them inside out */
 function clipNear(P){ var out=[]; for(var i=0;i<P.length;i++){ var a=P[i], b=P[(i+1)%P.length], ai=a[2]>=CNEAR, bi=b[2]>=CNEAR; if(ai) out.push(a); if(ai!==bi){ var t=(CNEAR-a[2])/(b[2]-a[2]); out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,CNEAR]); } } return out; }
 function proj(q){ return [CR.w/2+q[0]*CR.F/q[2],CR.h*CR.hz-q[1]*CR.F/q[2]]; }
@@ -3989,6 +4007,11 @@ function spt(p,toward){ var a=toCam(p); if(a[2]<CNEAR){ var b=toCam(toward); if(
 function cDist(p){ return Math.hypot(p[0]-CR.cam.x,p[2]-CR.cam.z); }
 function cDepth(z){ return Math.max(0,Math.min(1,(z-0.3)/(CD-0.3))); }
 function fogged(c,p){ return cMix(c,CR.T.fog,Math.max(0,Math.min(1,(cDist(p)-2)/(CD+4)))*CR.T.fogK); }
+/* a soft round light on a wall or the floor: c its centre, u and v its two radii in the plane, drawn as the ellipse it
+   makes on screen; clip keeps it on its own surface */
+function crGlowAt(ctx,c,u,v,col,al,clip){ if(al<=0) return; var o=spt(c,[c[0],c[1],c[2]-1]), eu=spt([c[0]+u[0],c[1]+u[1],c[2]+u[2]],c), ev=spt([c[0]+v[0],c[1]+v[1],c[2]+v[2]],c); if(!o||!eu||!ev) return;
+  ctx.save(); if(clip){ cPath(ctx,clip); ctx.clip(); } ctx.transform(eu[0]-o[0],eu[1]-o[1],ev[0]-o[0],ev[1]-o[1],o[0],o[1]);
+  var g=ctx.createRadialGradient(0,0,0,0,0,1); g.addColorStop(0,cStr(col,al)); g.addColorStop(0.42,cStr(col,al*0.45)); g.addColorStop(1,cStr(col,0)); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,1,0,7); ctx.fill(); ctx.restore(); }
 function cPath(ctx,s){ ctx.beginPath(); ctx.moveTo(s[0][0],s[0][1]); for(var i=1;i<s.length;i++) ctx.lineTo(s[i][0],s[i][1]); ctx.closePath(); }
 function fillP(ctx,P,style){ var s=scr(P); if(!s) return null; cPath(ctx,s); ctx.fillStyle=style; ctx.fill(); return s; }
 function gradP(ctx,P,a,b,stops){ var s=scr(P); if(!s) return null; var pa=spt(a,b), pb=spt(b,a); if(!pa||!pb){ cPath(ctx,s); ctx.fillStyle=stops[0][1]; ctx.fill(); return s; }
@@ -4028,19 +4051,31 @@ function crArranged(k,it,avail){ var list=[], n=it.length, up=Math.ceil(n*0.6), 
     list.push({flat:true,u0:u0+off,u1:u0+off+len,y0:y,y1:y+th,c:x2.c,tone:(((h2>>8)%13)-6)*0.012,hit:x2.hit}); y+=th+0.001; }
   return list; }
 
-/* ---- the linking book's page: a slowly drifting view of the tracker's own map ---- */
-var CMAP=null, CMAPSIG="";
-function crMapTex(){ var sig=(S.sites||[]).length+"/"+S.runs.length; if((CMAP&&CMAPSIG===sig)||!window.__GEO||!window.d3) return CMAP; CMAPSIG=sig;
-  var c=document.createElement("canvas"); c.width=1000; c.height=520; var x=c.getContext("2d"), cs=getComputedStyle(document.documentElement), tk=function(n){ return cs.getPropertyValue(n).trim()||"#262321"; };
-  var sea=x.createRadialGradient(500,260,40,500,260,560); sea.addColorStop(0,"#2E2A27"); sea.addColorStop(1,tk("--sea")); x.fillStyle=sea; x.fillRect(0,0,1000,520);
-  x.fillStyle="#655B51"; (window.__GEO.countries||[]).forEach(function(cn){ try{ x.fill(new Path2D(cn.d)); }catch(e){} });
-  if(window.__GEO.borders){ x.strokeStyle="rgba(250,247,242,.12)"; x.lineWidth=0.7; try{ x.stroke(new Path2D(window.__GEO.borders)); }catch(e){} }
+/* ---- the linking book's page: a slowly drifting view of the tracker's own map ----
+   In daylight colours whatever the appearance, so it reads as a map even from the entrance: a blue sea, lighter towards
+   the middle, pale warm land, the run links in the house orange with a soft glow and bright dots at their sites. A sharper
+   copy is made only when the map is about to grow to fill the corridor. */
+var CMAP=null, CMAPB=null, CMAPSIG="";
+function crMapTex(big){ if(!window.__GEO||!window.d3) return big?CMAPB:CMAP; var sig=(S.sites||[]).length+"/"+S.runs.length; if(CMAPSIG!==sig){ CMAPSIG=sig; CMAP=CMAPB=null; }
+  if(big) return CMAPB||(CMAPB=crMapDraw(2)); return CMAP||(CMAP=crMapDraw(1)); }
+function crMapDraw(k){ var c=document.createElement("canvas"); c.width=1000*k; c.height=520*k; var x=c.getContext("2d"); x.scale(k,k);
+  var sea=x.createRadialGradient(520,250,20,500,260,620); sea.addColorStop(0,"#8DB9DE"); sea.addColorStop(0.5,"#679BC9"); sea.addColorStop(1,"#4A7DB0"); x.fillStyle=sea; x.fillRect(0,0,1000,520);
+  x.fillStyle="#F4EBDD"; x.strokeStyle="rgba(110,86,62,.26)"; x.lineWidth=0.6; x.lineJoin="round";
+  (window.__GEO.countries||[]).forEach(function(cn){ try{ var p=new Path2D(cn.d); x.fill(p); x.stroke(p); }catch(e){} });
   /* the run links, drawn as on the map, glowing a little since the page is a light source */
-  try{ var P=d3.geoNaturalEarth1().fitExtent([[0,0],[1000,520]],{type:"Sphere"}); x.lineCap="round";
+  try{ var P=d3.geoNaturalEarth1().fitExtent([[0,0],[1000,520]],{type:"Sphere"}), dots=[]; x.lineCap="round";
+    x.save(); x.shadowColor="rgba(255,150,72,.85)"; x.shadowBlur=6*k; x.strokeStyle="rgba(222,147,88,.96)"; x.lineWidth=2.2;
     S.runs.forEach(function(r){ var pts=(r.placed||[]).map(function(p){ var s=SBY[p.site]; return s?P([s.lon,s.lat]):null; }).filter(Boolean);
-      for(var i=1;i<pts.length;i++){ var a=pts[0], b=pts[i], mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2-Math.hypot(b[0]-a[0],b[1]-a[1])*0.18; x.save(); x.shadowColor="rgba(230,160,106,.8)"; x.shadowBlur=8; x.strokeStyle="rgba(230,160,106,.92)"; x.lineWidth=2.6; x.beginPath(); x.moveTo(a[0],a[1]); x.quadraticCurveTo(mx,my,b[0],b[1]); x.stroke(); x.restore(); }
-      pts.forEach(function(p){ x.fillStyle="#F2C9A2"; x.beginPath(); x.arc(p[0],p[1],3.6,0,7); x.fill(); }); }); }catch(e){}
-  CMAP=c; return c; }
+      for(var i=1;i<pts.length;i++){ var a=pts[0], b=pts[i], mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2-Math.hypot(b[0]-a[0],b[1]-a[1])*0.18; x.beginPath(); x.moveTo(a[0],a[1]); x.quadraticCurveTo(mx,my,b[0],b[1]); x.stroke(); }
+      dots.push.apply(dots,pts); });
+    x.restore(); x.fillStyle="#FFFBF4"; x.strokeStyle="#D9813F"; x.lineWidth=1.1;
+    dots.forEach(function(p){ x.beginPath(); x.arc(p[0],p[1],3.1,0,7); x.fill(); x.stroke(); }); }catch(e){}
+  /* some browsers draw a canvas only when it is first used; reading a pixel has it drawn now, while nothing moves */
+  try{ x.getImageData(0,0,1,1); }catch(e){}
+  return c; }
+/* the sharper copy is made once, a little after the corridor first shows and while the page is idle */
+function crMapSoon(){ if(CMAPB||CR.mapT) return; var go=function(){ CR.mapT=0; if(CV.on&&S.view==="database"&&!CR.tw) crMapTex(true); };
+  CR.mapT=window.requestIdleCallback?requestIdleCallback(go,{timeout:2500}):setTimeout(go,1500); }
 /* The left page carries a few lines of handwriting-like strokes, no letters, laid out once in page coordinates. */
 var CINK=null;
 function crInk(){ if(CINK) return CINK; var lines=[], seed=7, rnd=function(){ seed=(seed*16807)%2147483647; return seed/2147483647; };
@@ -4056,10 +4091,10 @@ function crDraw(now){
   crRoom(ctx,T);
   CR.hulls={}; CR.page=null;
   /* furthest first, so nearer cases and the lectern cover what lies behind them */
-  var items=CASES.map(function(k){ return {k:k,d:cDist(cpt(k,clen(k)/2,1,CASED))}; }); items.push({lect:true,d:cDist([0,1,CLZ])});
+  var items=CASES.map(function(k){ return {k:k,d:cDist(cpt(k,clen(k)/2,1,CASED))}; }); items.push({lect:true,d:cDist([CLX,1,CLZ])});
   items.sort(function(a,b){ return b.d-a.d; }).forEach(function(o){ if(o.lect) crLectern(ctx,T,now); else crCase(ctx,T,o.k); });
   if(T.dark) crTorch(ctx);
-  crLabels(); }
+  crShine(ctx,T); crLabels(); crAura(); }
 function crRoom(ctx,T){
   var X=CW/2, H=CHT, N=16, z0=CZ0, dz=(CD-z0)/N, i, wallAt=function(z){ return cMix(T.wallN,T.wallF,cDepth(z)); }, fl=function(z){ return cMix(T.floorN,T.floorF,cDepth(z)); }, ce=function(z){ return cMix(T.ceilN,T.ceilF,cDepth(z)); };
   /* the ceiling, floor and walls darken with depth; drawn in short lengths, each with its own gradient, so the change is even */
@@ -4070,9 +4105,8 @@ function crRoom(ctx,T){
     gradP(ctx,[[X,0,a],[X,H,a],[X,H,b],[X,0,b]],[X,H/2,a],[X,H/2,b],[[0,cStr(wallAt(a))],[1,cStr(wallAt(b))]]); }
   /* a plain wall closes the corridor behind the entrance, so turning round never faces a void */
   fillP(ctx,[[X,0,z0],[-X,0,z0],[-X,H,z0],[X,H,z0]],cStr(T.wallN));
-  /* the end wall, with a soft warm glow behind the last case */
-  var s=fillP(ctx,[[-X,0,CD],[X,0,CD],[X,H,CD],[-X,H,CD]],cStr(T.end)), c=spt([0,1.55,CD],[0,1.55,CD-1]), e2=spt([1.9,1.55,CD],[1.9,1.55,CD-1]);
-  if(s&&c&&e2){ var r=Math.abs(e2[0]-c[0]), g=ctx.createRadialGradient(c[0],c[1],0,c[0],c[1],r); g.addColorStop(0,cStr(T.hot,T.glowA)); g.addColorStop(0.55,cStr(T.hot,T.glowA*0.35)); g.addColorStop(1,cStr(T.hot,0)); cPath(ctx,s); ctx.fillStyle=g; ctx.fill(); }
+  /* the end wall, and on it a faint pool of the open book's light */
+  var s=fillP(ctx,[[-X,0,CD],[X,0,CD],[X,H,CD],[-X,H,CD]],cStr(T.end)); if(s) crGlowAt(ctx,[CLX,1.3,CD],[1.55,0,0],[0,1.25,0],T.aura,T.wallA,s);
   /* floorboards converging on the end, as fine lines */
   ctx.lineWidth=1; ctx.strokeStyle=cStr(T.board,T.boardA);
   for(var px=-X+CW/9;px<X-0.01;px+=CW/9){ var p1=spt([px,0,z0],[px,0,CD]), p2=spt([px,0,CD],[px,0,z0]); if(p1&&p2){ ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke(); } }
@@ -4134,35 +4168,52 @@ function crFlat(ctx,T,k,b,on){ var Q=function(u,y,d){ return cpt(k,u,y,d); }, dF
 function crBookend(ctx,T,k,b){ var Q=function(u,y,d){ return cpt(k,u,y,d); }, dF=CASED-0.07, dB=dF-0.12, u=b.u0+0.004, col=fogged(cMix(T.frameSide,T.edge,T.dark?0.3:0.28),Q(u,b.y0,dF)), y1=b.y1, yr=y1-0.035;
   fillP(ctx,[Q(u,b.y0,dF),Q(u,b.y0,dB),Q(u,yr,dB),Q(u,y1,dB+0.04),Q(u,y1,dF)],cStr(col));
   fillP(ctx,[Q(u-0.003,b.y0,dF),Q(u+0.003,b.y0,dF),Q(u+0.003,y1,dF),Q(u-0.003,y1,dF)],cStr(cMix(col,CWHITE,T.dark?0.05:0.25))); }
-/* a slim lectern before the last case, with an open book; its right page is a window on the map */
+/* a slim lectern alone on the right of the end wall, with an open book; its right page is a window on the map */
 function crLectern(ctx,T,now){
-  var z=CLZ, wood=T.dark?[120,98,78]:[201,186,168], woodD=cMix(wood,CBLACK,0.18), sh=function(c,p){ return cStr(fogged(c,p)); };
-  var gs=spt([0,0.001,z],[0,0.001,z-1]), ge=spt([0.42,0.001,z],[0.42,0.001,z-1]);
-  if(gs&&ge){ var r=Math.abs(ge[0]-gs[0]), g=ctx.createRadialGradient(gs[0],gs[1],0,gs[0],gs[1],r); g.addColorStop(0,cStr(CBLACK,T.dark?0.3:0.12)); g.addColorStop(1,cStr(CBLACK,0)); ctx.save(); ctx.translate(gs[0],gs[1]); ctx.scale(1,0.3); ctx.translate(-gs[0],-gs[1]); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(gs[0],gs[1],r,0,7); ctx.fill(); ctx.restore(); }
-  var box=function(x0,x1,y0,y1,z0,z1,c){ fillP(ctx,[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],sh(c,[x0,y0,z0])); fillP(ctx,[[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],sh(cMix(c,CBLACK,0.12),[x1,y0,z0])); fillP(ctx,[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],sh(cMix(c,CBLACK,0.12),[x0,y0,z0])); if(CR.eye>y1) fillP(ctx,[[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],sh(cMix(c,CWHITE,0.08),[x0,y1,z0])); };
+  var z=CLZ, X=CLX, wood=T.dark?[120,98,78]:[201,186,168], woodD=cMix(wood,CBLACK,0.18), sh=function(c,p){ return cStr(fogged(c,p)); }, P=cBook;
+  /* the book's light pools on the floor below it, round the lectern's own soft shadow */
+  crGlowAt(ctx,[X,0.001,z-0.1],[0.95,0,0],[0,0,0.95],T.aura,T.floorA);
+  crGlowAt(ctx,[X,0.001,z],[0.42,0,0],[0,0,0.3],CBLACK,T.dark?0.3:0.12);
+  var box=function(x0,x1,y0,y1,z0,z1,c){ x0+=X; x1+=X; fillP(ctx,[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],sh(c,[x0,y0,z0])); fillP(ctx,[[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],sh(cMix(c,CBLACK,0.12),[x1,y0,z0])); fillP(ctx,[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],sh(cMix(c,CBLACK,0.12),[x0,y0,z0])); if(CR.eye>y1) fillP(ctx,[[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],sh(cMix(c,CWHITE,0.08),[x0,y1,z0])); };
   box(-0.17,0.17,0,0.035,z-0.13,z+0.13,woodD); box(-0.025,0.025,0.035,0.98,z-0.02,z+0.02,wood);
   /* the sloping board, and the open book on it */
-  var W2=0.34, P=function(x,t,h){ return [x,0.99+t*0.2+(h||0),z-0.17+t*0.34]; };
+  var W2=0.34;
   fillP(ctx,[P(-W2,0,-0.025),P(W2,0,-0.025),P(W2,0,0),P(-W2,0,0)],sh(woodD,P(0,0)));
   fillP(ctx,[P(-W2,0),P(W2,0),P(W2,1),P(-W2,1)],sh(wood,P(0,0.5)));
-  var pg=cMix(T.pages,CWHITE,T.dark?0:0.2), lift=0.012;
-  fillP(ctx,[P(-0.3,0.08,0.004),P(0.3,0.08,0.004),P(0.3,0.92,0.004),P(-0.3,0.92,0.004)],sh(cMix(pg,CBLACK,0.22),P(0,0.5)));
-  var lp=[P(-0.29,0.1,lift),P(-0.008,0.1,lift*1.6),P(-0.008,0.9,lift*1.6),P(-0.29,0.9,lift)], rp=[P(0.008,0.1,lift*1.6),P(0.29,0.1,lift),P(0.29,0.9,lift),P(0.008,0.9,lift*1.6)];
-  var sl=gradP(ctx,lp,P(-0.29,0.5,lift),P(0,0.5,lift),[[0,sh(pg,P(0,0.5))],[0.8,sh(pg,P(0,0.5))],[1,sh(cMix(pg,CBLACK,0.16),P(0,0.5))]]);
-  gradP(ctx,rp,P(0,0.5,lift),P(0.29,0.5,lift),[[0,sh(cMix(pg,CBLACK,0.16),P(0,0.5))],[0.2,sh(pg,P(0,0.5))],[1,sh(pg,P(0,0.5))]]);
+  fillP(ctx,[P(-0.3,0.08,0.004),P(0.3,0.08,0.004),P(0.3,0.92,0.004),P(-0.3,0.92,0.004)],sh(cMix(crPaper(T),CBLACK,0.22),P(0,0.5)));
+  var sl=crSheet(ctx,T,-1); crSheet(ctx,T,1);
   /* the journal's left page: faint lines of handwriting, drawn only once the page is near enough to show them */
-  if(sl){ var span=Math.hypot(sl[1][0]-sl[0][0],sl[1][1]-sl[0][1]); if(span>60){ ctx.save(); ctx.strokeStyle=cStr(T.ink,T.inkA); ctx.lineWidth=Math.max(0.6,span/260); ctx.lineCap="round"; ctx.lineJoin="round";
+  if(sl){ var span=Math.hypot(sl[1][0]-sl[0][0],sl[1][1]-sl[0][1]), lift=CLIFT; if(span>60){ ctx.save(); ctx.strokeStyle=cStr(T.ink,T.inkA); ctx.lineWidth=Math.max(0.6,span/260); ctx.lineCap="round"; ctx.lineJoin="round";
     crInk().forEach(function(seg){ var lift2=lift*(1+0.6*(seg[0][0]+0.29)/0.28); ctx.beginPath(); seg.forEach(function(q,i){ var p=spt(P(q[0],q[1],lift2+0.0005),P(0,0.5,lift)); if(!p) return; if(i) ctx.lineTo(p[0],p[1]); else ctx.moveTo(p[0],p[1]); }); ctx.stroke(); }); ctx.restore(); } }
   /* the window on the right page */
-  var a=P(0.045,0.86,lift*1.3), bR=P(0.255,0.86,lift*1.3), cL=P(0.045,0.2,lift*1.3), dR=P(0.255,0.2,lift*1.3), q=scr([a,bR,dR,cL]), tex=crMapTex();
-  if(q&&tex){ var s0=proj(toCam(a)), s1=proj(toCam(bR)), s2=proj(toCam(cL)), t=CREDUCE?0:(now-CR.t0)/1000, sw=300, shh=sw*1.25, sx=((180+t*9)%1000+1000)%1000, sy=60;
-    ctx.save(); cPath(ctx,q); ctx.clip(); var A=(s1[0]-s0[0])/sw, B=(s1[1]-s0[1])/sw, C=(s2[0]-s0[0])/shh, D=(s2[1]-s0[1])/shh, dpr=CR.dpr;
-    /* the page is near enough to a parallelogram for the map to be laid on it with an affine transform */
-    ctx.setTransform(dpr*A,dpr*B,dpr*C,dpr*D,dpr*(s0[0]-A*sx-C*sy),dpr*(s0[1]-B*sx-D*sy)); ctx.imageSmoothingQuality="high"; ctx.drawImage(tex,0,0); ctx.drawImage(tex,1000,0); ctx.setTransform(dpr,0,0,dpr,0,0);
-    var cx=(q[0][0]+q[2][0])/2, cy=(q[0][1]+q[2][1])/2, rr=Math.max(4,Math.hypot(q[0][0]-q[2][0],q[0][1]-q[2][1])*0.6); ctx.globalCompositeOperation="screen";
-    var g2=ctx.createRadialGradient(cx,cy,0,cx,cy,rr); g2.addColorStop(0,"rgba(255,222,180,0.14)"); g2.addColorStop(0.7,"rgba(255,214,170,0.06)"); g2.addColorStop(1,"rgba(255,214,170,0)"); ctx.fillStyle=g2; ctx.fillRect(cx-rr,cy-rr,2*rr,2*rr); ctx.restore();
-    ctx.save(); ctx.globalCompositeOperation=T.dark?"lighter":"screen"; var gl=ctx.createRadialGradient(cx,cy,rr*0.3,cx,cy,rr*(T.dark?3.2:2.2)); gl.addColorStop(0,cStr([255,214,170],T.dark?0.22:0.16)); gl.addColorStop(1,cStr([255,214,170],0)); ctx.fillStyle=gl; ctx.fillRect(cx-rr*3.3,cy-rr*3.3,rr*6.6,rr*6.6); ctx.restore();
-    CR.page={q:q,cx:cx,cy:cy,r:rr}; } }
+  var win=crWin(), q=scr(win), tex=crMapTex();
+  if(q&&tex){ var t=CREDUCE?0:(now-CR.t0)/1000, crop=crPageCrop(t), sq=win.map(function(p){ return proj(toCam(p)); });
+    cTexQuad(ctx,tex,crop,sq,q);
+    var cx=(q[0][0]+q[2][0])/2, cy=(q[0][1]+q[2][1])/2, rr=Math.max(4,Math.hypot(q[0][0]-q[2][0],q[0][1]-q[2][1])*0.6);
+    ctx.save(); cPath(ctx,q); ctx.clip(); ctx.globalCompositeOperation="screen";
+    var g2=ctx.createRadialGradient(cx,cy,0,cx,cy,rr); g2.addColorStop(0,"rgba(255,232,200,0.16)"); g2.addColorStop(0.7,"rgba(255,222,186,0.05)"); g2.addColorStop(1,"rgba(255,222,186,0)"); ctx.fillStyle=g2; ctx.fillRect(cx-rr,cy-rr,2*rr,2*rr); ctx.restore();
+    CR.page={q:q,sq:sq,crop:crop,cx:cx,cy:cy,r:rr}; } }
+/* the paper of the book, a little whiter in daylight */
+var CLIFT=0.012;
+function crPaper(T){ return cMix(T.pages,CWHITE,T.dark?0:0.2); }
+/* one page of the open book, the left (-1) or the right (1), shaded towards the spine; the riffle lays fresh sheets with it */
+function crSheet(ctx,T,side){ var P=cBook, lift=CLIFT, pg=crPaper(T), c=cStr(fogged(pg,P(0,0.5))), cd=cStr(fogged(cMix(pg,CBLACK,0.16),P(0,0.5)));
+  if(side<0) return gradP(ctx,[P(-0.29,0.1,lift),P(-0.008,0.1,lift*1.6),P(-0.008,0.9,lift*1.6),P(-0.29,0.9,lift)],P(-0.29,0.5,lift),P(0,0.5,lift),[[0,c],[0.8,c],[1,cd]]);
+  return gradP(ctx,[P(0.008,0.1,lift*1.6),P(0.29,0.1,lift),P(0.29,0.9,lift),P(0.008,0.9,lift*1.6)],P(0,0.5,lift),P(0.29,0.5,lift),[[0,cd],[0.2,c],[1,c]]); }
+/* the map's window on the right page, top left, top right, bottom right, bottom left */
+function crWin(){ var h=CLIFT*1.3; return [cBook(0.045,0.86,h),cBook(0.255,0.86,h),cBook(0.255,0.2,h),cBook(0.045,0.2,h)]; }
+/* the part of the world the page shows, drifting slowly eastwards, in the map's own 1000 by 520 units */
+function crPageCrop(t){ return [((180+t*9)%1000+1000)%1000,40,360,446]; }
+/* The map laid on a quad with an affine transform: s gives the quad's corners on screen from the top left round, crop the
+   part of the map it shows. The map repeats sideways, as the world does. */
+function cTexQuad(ctx,img,crop,s,clip){ var dpr=CR.dpr, A=(s[1][0]-s[0][0])/crop[2], B=(s[1][1]-s[0][1])/crop[2], C=(s[3][0]-s[0][0])/crop[3], D=(s[3][1]-s[0][1])/crop[3];
+  ctx.save(); cPath(ctx,clip||s); ctx.clip(); ctx.setTransform(dpr*A,dpr*B,dpr*C,dpr*D,dpr*(s[0][0]-A*crop[0]-C*crop[1]),dpr*(s[0][1]-B*crop[0]-D*crop[1])); ctx.imageSmoothingQuality="high";
+  for(var o=Math.floor(crop[0]/1000)*1000;o<crop[0]+crop[2];o+=1000) ctx.drawImage(img,o,0,1000,520); ctx.restore(); }
+/* the page is a light of its own: in the dark the brightest thing in the room, in daylight a warm haze round it */
+function crShine(ctx,T){ var p=CR.page; if(!p) return; var R=p.r*(T.dark?3.6:2.6), a=T.dark?0.3:0.15, g=ctx.createRadialGradient(p.cx,p.cy,0,p.cx,p.cy,R), f=0.85*p.r/R;
+  /* faint over the page itself, so the map keeps its colours, strongest just beyond its edge */
+  g.addColorStop(0,cStr([255,218,176],a*0.12)); g.addColorStop(f,cStr([255,218,176],a)); g.addColorStop(Math.min(0.9,f*2.1),cStr([255,206,160],a*0.32)); g.addColorStop(1,cStr([255,206,160],0));
+  ctx.save(); ctx.globalCompositeOperation=T.dark?"lighter":"screen"; ctx.fillStyle=g; ctx.fillRect(p.cx-R,p.cy-R,2*R,2*R); ctx.restore(); }
 function cHull(P){ P=P.slice().sort(function(a,b){ return a[0]-b[0]||a[1]-b[1]; }); var cr=function(o,a,b){ return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); }, lo=[], up=[];
   P.forEach(function(p){ while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],p)<=0) lo.pop(); lo.push(p); });
   for(var i=P.length-1;i>=0;i--){ var p=P[i]; while(up.length>=2&&cr(up[up.length-2],up[up.length-1],p)<=0) up.pop(); up.push(p); }
@@ -4175,32 +4226,37 @@ function crOnPage(x,y){ var p=CR.page; if(!p) return false; return cInPoly(x,y,p
 
 /* ---- dark mode: darkness everywhere but where the torch falls; the case under it is lit a little more, and the page gives its own glow ---- */
 var CDK=null;
+/* the darkness is soft everywhere, so it is worked out at half the corridor's size and laid over it smoothly enlarged */
 function crTorch(ctx){
-  var w=CR.cv.width, h=CR.cv.height, dpr=CR.dpr; if(!CDK) CDK=document.createElement("canvas"); if(CDK.width!==w||CDK.height!==h){ CDK.width=w; CDK.height=h; }
+  var k=0.5, w=Math.ceil(CR.w*k), h=Math.ceil(CR.h*k); if(!CDK) CDK=document.createElement("canvas"); if(CDK.width!==w||CDK.height!==h){ CDK.width=w; CDK.height=h; }
   var d=CDK.getContext("2d"), t=CR.torch; d.setTransform(1,0,0,1,0,0); d.globalCompositeOperation="source-over"; d.clearRect(0,0,w,h); d.fillStyle="rgba(4,3,3,0.935)"; d.fillRect(0,0,w,h);
-  d.setTransform(dpr,0,0,dpr,0,0); d.globalCompositeOperation="destination-out";
+  d.setTransform(k,0,0,k,0,0); d.globalCompositeOperation="destination-out";
   var g=d.createRadialGradient(t.x,t.y,0,t.x,t.y,t.R); g.addColorStop(0,cStr(CBLACK,t.I)); g.addColorStop(0.3,cStr(CBLACK,t.I*0.86)); g.addColorStop(0.6,cStr(CBLACK,t.I*0.42)); g.addColorStop(0.85,cStr(CBLACK,t.I*0.1)); g.addColorStop(1,cStr(CBLACK,0)); d.fillStyle=g; d.fillRect(t.x-t.R,t.y-t.R,2*t.R,2*t.R);
   var hv=CR.hover||CR.focus; if(hv&&CR.hulls[hv]){ cPath(d,CR.hulls[hv]); d.fillStyle="rgba(0,0,0,0.2)"; d.fill(); }
-  if(CR.page){ var p=CR.page, pr=Math.max(26,p.r*3.4), g3=d.createRadialGradient(p.cx,p.cy,0,p.cx,p.cy,pr); g3.addColorStop(0,"rgba(0,0,0,0.85)"); g3.addColorStop(0.35,"rgba(0,0,0,0.4)"); g3.addColorStop(1,"rgba(0,0,0,0)"); d.fillStyle=g3; d.fillRect(p.cx-pr,p.cy-pr,2*pr,2*pr); }
-  ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.drawImage(CDK,0,0); ctx.restore();
+  /* the open book is a light of its own: the page shows through, and so does the light it throws on the wall and the floor */
+  if(CR.page){ var p=CR.page, pr=Math.max(30,p.r*3.6), g3=d.createRadialGradient(p.cx,p.cy,0,p.cx,p.cy,pr); g3.addColorStop(0,"rgba(0,0,0,0.96)"); g3.addColorStop(0.3,"rgba(0,0,0,0.62)"); g3.addColorStop(1,"rgba(0,0,0,0)"); d.fillStyle=g3; d.fillRect(p.cx-pr,p.cy-pr,2*pr,2*pr); }
+  crGlowAt(d,[CLX,1.3,CD],[1.55,0,0],[0,1.25,0],CBLACK,0.5); crGlowAt(d,[CLX,0.001,CLZ-0.1],[0.95,0,0],[0,0,0.95],CBLACK,0.5);
+  ctx.save(); ctx.imageSmoothingQuality="medium"; ctx.drawImage(CDK,0,0,w/k,h/k); ctx.restore();
   /* the torch is warm: a faint glow added where it falls */
   ctx.save(); ctx.globalCompositeOperation="screen"; var gw=ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,t.R*0.9); gw.addColorStop(0,cStr([255,176,108],0.13*t.I)); gw.addColorStop(1,cStr([255,176,108],0)); ctx.fillStyle=gw; ctx.fillRect(t.x-t.R,t.y-t.R,2*t.R,2*t.R); ctx.restore(); }
-/* with no pointer over it the torch rests, dimmer and smaller, at the end of the corridor */
-function torchRest(){ var e=spt([0,1.6,CD],[0,1.6,CD-1])||[CR.w/2,CR.h*0.45]; CR.tt={x:e[0],y:e[1],I:0.32,R:Math.min(CR.w,CR.h)*0.28,rest:true}; }
+/* with no pointer over it the torch rests, dimmer and smaller, on the open book */
+function torchRest(){ var e=spt(cBook(0.14,0.52,0.02),[CLX,1.1,CLZ-1])||[CR.w/2,CR.h*0.45]; CR.tt={x:e[0],y:e[1],I:0.32,R:Math.min(CR.w,CR.h)*0.28,rest:true}; }
 function torchAt(x,y){ CR.tt={x:x,y:y,I:1,R:Math.max(150,Math.min(CR.w,CR.h)*0.5),rest:false}; }
 
 /* Labels sit just above their own case. With a mouse only the case under it is labelled; where there is no hover all
    are. Overlaps are resolved on the whole button, which is the tap target, so no label's hit area covers another's:
    each label takes the nearest free place round its anchor, preferring a move towards its own wall, and stays inside
-   the corridor. The near pair go first, then the end case, which sits in the middle and has nowhere to move. */
-function crLabels(){ var box=$("cLabs"); if(!box) return; var put=[], rank=function(k){ return k.s==="met"?1:k.d<CASES[4].d-4?0:2; };
+   the corridor. The near pair go first, then the far pair, and the end case last: it has open wall above it, so when
+   the far pair need the room its label rises there rather than crowding theirs. */
+function crLabels(){ var box=$("cLabs"); if(!box) return; var put=[], rank=function(k){ return k.s==="met"?2:k.d<CASES[4].d-4?0:1; };
   CASES.slice().sort(function(a,b){ return rank(a)-rank(b)||a.d-b.d; }).forEach(function(k){ var el=box.querySelector('[data-cgo="'+k.s+'"]'); if(!el) return;
     var it=cItems(k.s), n=KB.q?it.filter(function(x){return x.hit;}).length:it.length, nEl=el.querySelector(".n"); if(nEl.textContent!==String(n)) nEl.textContent=n;
     var p=k.lab, ok=!!p&&!CR.tw&&p[0]>-40&&p[0]<CR.w+40, lit=CR.hover===k.s||CR.focus===k.s, shown=ok&&(!CHOVER||lit);
     el.classList.toggle("off",!ok); el.classList.toggle("on",lit); if(!ok) return;
     var w=el.offsetWidth||90, h=el.offsetHeight||32, cx=function(x){ return Math.max(w/2+4,Math.min(CR.w-w/2-4,x)); }, cy=function(y){ return Math.max(h+2,Math.min(CR.h-2,y)); };
-    var x0=cx(p[0]), y0=cy(p[1]+4), dir=k.side, best=null;
-    if(shown){ [0,-1,0.6,-2,-3,1.2,-4].forEach(function(dy){ [0,0.25,0.5,1,-0.25,-0.5,1.5,-1].forEach(function(dx){
+    /* where every label shows, the far pair lean towards their own walls, clear of the end case between them */
+    var dir=k.side, x0=cx(p[0]+(!CHOVER&&rank(k)===1?dir*0.2*w:0)), y0=cy(p[1]+4), best=null;
+    if(shown){ (dir?[0,-1,0.6,-2,-3,1.2,-4]:[0,-1,-1.5,-2,0.6,-3,1.2]).forEach(function(dy){ [0,0.25,0.5,1,-0.25,-0.5,1.5,-1].forEach(function(dx){
         var x=cx(x0+(dir?dir*dx:dx)*w), y=cy(y0+dy*(h+2)), cost=Math.abs(x-x0)+Math.abs(y-y0)*1.6;
         if(best&&cost>=best[2]) return;
         if(put.some(function(q){ return Math.abs(q[0]-x)<(q[2]+w)/2&&Math.abs(q[1]-y)<(q[3]+h)/2; })) return;
@@ -4210,9 +4266,10 @@ function crLabels(){ var box=$("cLabs"); if(!box) return; var put=[], rank=funct
     el.style.transform="translate("+best[0].toFixed(1)+"px,"+best[1].toFixed(1)+"px) translate(-50%,-100%)"; }); }
 
 /* ---- motion ----
-   The loop runs only while something moves, a walk, a held key or the torch settling, and only while the corridor is
-   on the Knowledge tab. The page's map drifts a few times a second, and only while the pointer is near it or the page
-   is close enough to be read; otherwise the idle corridor asks for no frames at all. */
+   The loop runs only while something moves, a walk, the open book's riffle, a held key or the torch settling, and only
+   while the corridor is on the Knowledge tab. The page's map drifts a few times a second, and only while the pointer is
+   near it or the page is close enough to be read; the book's light breathes without the loop, so the idle corridor
+   asks for no frames at all. */
 var CHOVER=!(window.matchMedia&&matchMedia("(hover: none)").matches);
 var CREDUCE=!!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);
 function cEase(t){ return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
@@ -4225,33 +4282,51 @@ function crTick(ts){ CR.raf=0; clearTimeout(CR.driftT); CR.driftT=0;
   if(S.view!=="database"){ if(CR.tw) crAbort(); return; }
   if(!CV.on&&!CR.tw) return;
   var w=CR.tw, moving=false;
-  /* the heavy frame comes first: the list is laid out before the walk's clock starts, so the camera never jumps */
-  if(w&&w.prep){ var sec=w.prep; w.prep=null; S.dbTab=sec; _cRenderDatabase(); crLift(sec); CR.raf=requestAnimationFrame(crTick); return; }
+  /* the heavy frame comes first: the list, or the book's sharper map, is made before the clock starts, so the camera never jumps */
+  if(w&&w.prep){ var sec=w.prep; w.prep=null; if(w.link) crMapTex(true); else { S.dbTab=sec; _cRenderDatabase(); crLift(sec); } CR.raf=requestAnimationFrame(crTick); return; }
   var dt=CR.last?Math.min(0.05,(ts-CR.last)/1000):1/60; if(CR.last&&w&&w.t0) CR.frames.push(ts-CR.last); CR.last=ts;
-  if(w){ if(!w.t0) w.t0=ts; var t=Math.max(0,Math.min(1,(ts-w.t0)/w.dur)), e=cEase(t); CR.cam.x=w.a.x+(w.b.x-w.a.x)*e; CR.cam.z=w.a.z+(w.b.z-w.a.z)*e; CR.cam.yaw=w.a.yaw+cAng(w.b.yaw-w.a.yaw)*e;
+  if(w&&w.link){ if(!w.t0) w.t0=ts; if(crLinkStep(w,ts)&&CR.tw===w) CR.raf=requestAnimationFrame(crTick); return; }
+  var t=1; if(w){ if(!w.t0) w.t0=ts; t=crWalkStep(w,ts);
     if(w.mid&&ts-w.t0>=w.dur-w.midAt){ var m=w.mid; w.mid=null; m(); } if(CR.tw===w){ if(t>=1){ CR.tw=null; if(w.done) w.done(); } else moving=true; } }
   else{ /* held arrow keys walk and turn, easing in and out; the walls keep the reader in the corridor, facing no further back than a side wall */
     var K=CR.keys, tf=(K.f?1:0)-(K.b?1:0), tt=(K.r?1:0)-(K.l?1:0), k=Math.min(1,dt*5.5);
     CR.v.f+=(tf*2.2-CR.v.f)*k; CR.v.t+=(tt*1.2-CR.v.t)*k; if(Math.abs(CR.v.f)<0.002&&!tf) CR.v.f=0; if(Math.abs(CR.v.t)<0.002&&!tt) CR.v.t=0;
     if(CR.v.f||CR.v.t){ CR.cam.yaw=Math.max(-Math.PI/2,Math.min(Math.PI/2,cAng(CR.cam.yaw+CR.v.t*dt))); CR.cam.x+=Math.sin(CR.cam.yaw)*CR.v.f*dt; CR.cam.z+=Math.cos(CR.cam.yaw)*CR.v.f*dt;
-      var lim=CW/2-CASED-0.35; CR.cam.x=Math.max(-lim,Math.min(lim,CR.cam.x)); CR.cam.z=Math.max(CZ0+3.5,Math.min(CLZ-0.8,CR.cam.z)); moving=true; } }
+      var lim=CW/2-CASED-0.35; CR.cam.x=Math.max(-lim,Math.min(lim,CR.cam.x)); CR.cam.z=Math.max(CZ0+3.5,Math.min(CLZ-0.75,CR.cam.z)); moving=true; } }
   var T=CR.T, tc=CR.torch; if(T&&T.dark){ if(CR.tt.rest) torchRest(); var tg=CR.tt, kk=CREDUCE?1:1-Math.exp(-dt*11); ["x","y","I","R"].forEach(function(p){ tc[p]+=(tg[p]-tc[p])*kk; }); if(Math.abs(tc.x-tg.x)+Math.abs(tc.y-tg.y)+Math.abs(tc.I-tg.I)*100+Math.abs(tc.R-tg.R)>0.6) moving=true; else { tc.x=tg.x; tc.y=tg.y; tc.I=tg.I; tc.R=tg.R; } }
-  if(CV.on||CR.tw) crDraw(ts);
+  if(CV.on||CR.tw){ crRes(!!CR.tw); crDraw(ts); }
   if(moving) CR.raf=requestAnimationFrame(crTick);
   else if(CV.on&&crDrifting()) CR.driftT=setTimeout(crKick,150); }
-/* A walk cut short, by another tab, by Back or by the list icon, is undone completely: the corridor drops back into
-   the page, the list loses its hidden state and the next walk starts clean. */
-function crAbort(){ CR.tw=null; CR.keys={}; CR.v={f:0,t:0}; if(CV.on) CR.cam={x:CHOME.x,z:CHOME.z,yaw:CHOME.yaw}; crUnlift(); }
+/* While a walk or the glide to the book moves the camera, the corridor is drawn at one pixel to the point, a quarter of
+   the work on a sharp screen; it is drawn sharp again the moment the camera stops. */
+function crRes(lo){ var d=lo?1:Math.min(2,window.devicePixelRatio||1), cv=CR.cv; if(!cv||CR.dpr===d) return; CR.dpr=d; cv.width=Math.round(CR.w*d); cv.height=Math.round(CR.h*d); }
+/* A walk to a case: the head turns to the case over the first half, the body sets off a moment later on a gentle curve
+   and is still moving in when the corridor gives way to the list. A walk back out goes straight, turning as it goes. */
+function crWalkStep(w,ts){ var t=Math.max(0,Math.min(1,(ts-w.t0)/w.dur));
+  if(w.c){ var u=Math.max(0,Math.min(1,(t-0.1)/0.9)), p=(2.1-1.1*u)*u*u, q=1-p, c=w.c, bz=function(i){ return q*q*q*c[0][i]+3*q*q*p*c[1][i]+3*q*p*p*c[2][i]+p*p*p*c[3][i]; }, x=bz(0), z=bz(1), look=Math.atan2(w.look[0]-x,w.look[2]-z);
+    CR.cam.x=x; CR.cam.z=z; CR.cam.yaw=w.a.yaw+cAng(look-w.a.yaw)*cEase(Math.min(1,t/0.5)); return t; }
+  var e=cEase(t); CR.cam.x=w.a.x+(w.b.x-w.a.x)*e; CR.cam.z=w.a.z+(w.b.z-w.a.z)*e; CR.cam.yaw=w.a.yaw+cAng(w.b.yaw-w.a.yaw)*e; return t; }
+/* the body's path: it sets off the way the reader faces and arrives square to the case, never leaving the corridor */
+function crCurve(a,b){ var lim=CW/2-CASED-0.35, cl=function(x,z){ return [Math.max(-lim,Math.min(lim,x)),Math.max(CZ0+3.5,Math.min(CD-CASED-0.6,z))]; }, d=Math.hypot(b.x-a.x,b.z-a.z), d2=Math.min(0.7,d*0.3);
+  return [[a.x,a.z],cl(a.x+Math.sin(a.yaw)*d*0.42,a.z+Math.cos(a.yaw)*d*0.42),cl(b.x-Math.sin(b.yaw)*d2,b.z-Math.cos(b.yaw)*d2),[b.x,b.z]]; }
+/* A walk or the book's riffle cut short, by another tab, by Back or by the list icon, is undone completely: the corridor
+   drops back into the page, the list loses its hidden state, any warm light lifts and the next walk starts clean. */
+function crAbort(){ var w=CR.tw; CR.tw=null; CR.keys={}; CR.v={f:0,t:0}; if(w&&w.o){ var o=w.o; o.classList.remove("on"); setTimeout(function(){ o.remove(); },600); }
+  if(CV.on) CR.cam={x:CHOME.x,z:CHOME.z,yaw:CHOME.yaw}; crUnlift(); }
 function crUnlift(){ var sh=$("kCorrBox"); if(sh) sh.style.cssText=""; $("v-database").classList.remove("corrpre"); Array.prototype.forEach.call(document.querySelectorAll("#v-database .kpre"),function(e){ e.classList.remove("kpre"); }); var cor=$("kCorr"); if(cor) cor.classList.remove("gone"); }
 /* the address changes only while the Knowledge tab shows, so a walk left behind never rewrites another tab's address */
 function crAddr(h){ if(S.view==="database"&&location.hash!==h){ try{ history.replaceState(null,"",h); }catch(e){} } }
-/* standing before a case, as far back as the corridor allows, so it nearly fills the view */
-function crPose(s){ var k=CASES.filter(function(x){ return x.s===s; })[0], L=clen(k), hf=Math.atan(CR.w/2/CR.F), vf=Math.atan(CR.h*CR.hz/CR.F), need=Math.max((L/2+0.14)/Math.tan(hf),(CASEH*0.55)/Math.tan(vf));
-  if(k.side!==0){ var dd=Math.min(need,CW-CASED-0.4), x=k.side*(CW/2-CASED)-k.side*dd; return {x:x,z:(k.a+k.b)/2,yaw:k.side<0?-Math.PI/2:Math.PI/2}; }
-  return {x:0,z:Math.max(CZ0+3.5,CD-CASED-need),yaw:0}; }
+/* Standing square to a case and close, so it fills the view and its ends may run past the edges; before the book,
+   near enough that it fills about half the width, with the eye dipped to it. */
+function crPose(s){ var tanH=CR.w/2/CR.F;
+  if(s==="book"){ var db=Math.max(0.95,Math.min(1.9,0.3/(0.55*tanH))); return {x:CLX,z:CLZ-db,yaw:0}; }
+  var k=CASES.filter(function(x){ return x.s===s; })[0], L=clen(k), d=(L/2)/(1.25*tanH);
+  if(k.side!==0){ d=Math.max(1.7,Math.min(d,CW-CASED-0.4)); return {x:k.side*(CW/2-CASED)-k.side*d,z:(k.a+k.b)/2,yaw:k.side<0?-Math.PI/2:Math.PI/2}; }
+  d=Math.max(2.2,Math.min(d,CD-CASED-CZ0-3.5)); return {x:(k.a+k.b)/2,z:CD-CASED-d,yaw:0}; }
 function crOpen(s){ if(CR.tw||S.view!=="database") return; clearTimeout(CR.t1); CV.last=s; CR.keys={}; CR.v={f:0,t:0}; CR.hover=""; CR.focus=""; crLabels();
   if(CREDUCE){ S.dbTab=s; _cRenderDatabase(); crLift(s); crToList(s); return; }
-  CR.frames=[]; CR.tw={prep:s,a:{x:CR.cam.x,z:CR.cam.z,yaw:CR.cam.yaw},b:crPose(s),t0:0,dur:1050,midAt:270,mid:function(){ crToList(s); }}; crKick(); }
+  var k=CASES.filter(function(x){ return x.s===s; })[0], a={x:CR.cam.x,z:CR.cam.z,yaw:CR.cam.yaw}, b=crPose(s);
+  CR.frames=[]; CR.tw={prep:s,a:a,b:b,c:crCurve(a,b),look:cpt(k,clen(k)/2,1.2,CASED),t0:0,dur:1200,midAt:300,mid:function(){ crToList(s); }}; crKick(); }
 /* Before the walk the corridor is lifted over the page where it stands, clipped below the header, and the section's
    list is laid out unseen behind it, so nothing heavy happens while it moves; the list then rises in as it fades. */
 function crLift(s){ var sh=$("kCorrBox"), r=sh.getBoundingClientRect(), top=document.querySelector(".top"), hb=top?top.getBoundingClientRect().bottom:0, cut=Math.max(0,Math.min(r.height,hb-r.top));
@@ -4271,18 +4346,86 @@ function crShow(){ clearTimeout(CR.t1); if(CR.tw) crAbort(); var sh=$("kCorrBox"
   crMount(); crBooks(); CR.T=cPal(); if(was){ crDraw(); crKick(); return; } torchRest(); CR.torch={x:CR.tt.x,y:CR.tt.y,I:CR.tt.I,R:CR.tt.R}; CR.hover=""; CR.focus="";
   if(CV.last&&!CREDUCE){ var b=crPose(CV.last); CR.cam={x:b.x,z:b.z,yaw:b.yaw}; var cor=$("kCorr"); cor.classList.add("gone"); crDraw(); requestAnimationFrame(function(){ if(CV.on) cor.classList.remove("gone"); }); CR.tw={a:b,b:{x:CHOME.x,z:CHOME.z,yaw:CHOME.yaw},t0:0,dur:1400}; }
   else{ CR.cam={x:CHOME.x,z:CHOME.z,yaw:CHOME.yaw}; crDraw(); }
-  crKick(); }
+  crKick(); crMapSoon(); }
 function crHide(){ clearTimeout(CR.t1); var walking=!!CR.tw; if(walking) crAbort(); CV.on=false; crToggle(); var cor=$("kCorr");
   var done=function(){ $("v-database").classList.remove("corrv"); $("kCorrBox").hidden=true; if(cor) cor.classList.remove("gone"); _cRenderDatabase();
     [$("dbSeg"),$(CSECEL[S.dbTab])].forEach(function(x){ if(x){ x.classList.remove("kin"); void x.offsetWidth; x.classList.add("kin"); } }); crAddr("#knowledge/"+KHASH[S.dbTab]); };
   if(CREDUCE||walking||!cor){ done(); return; }
   cor.classList.add("gone"); CR.t1=setTimeout(function(){ if(!CV.on) done(); },220); }
-/* the page links to the map, through a moment of warm white */
-function crLink(){ if(CR.tw||S.view!=="database") return; var o=document.createElement("div"); o.className="clink"; document.body.appendChild(o);
-  requestAnimationFrame(function(){ o.classList.add("on"); }); setTimeout(function(){ if(S.view==="database") location.hash="map"; setTimeout(function(){ o.classList.remove("on"); setTimeout(function(){ o.remove(); },600); },120); },CREDUCE?0:360); }
+/* ---- the open book ----
+   It links to the map. Far from it, the reader first glides up to it and looks down; then a few pages riffle over to
+   the map, which brightens and grows to fill the corridor before the Map tab takes over through a moment of warm light.
+   The camera is still once the pages move, so those frames are the last full drawing with only the book redrawn on it.
+   With reduced motion the warm light alone leads to the map. */
+function crLink(){ if(CR.tw||S.view!=="database") return; clearTimeout(CR.t1);
+  if(CREDUCE){ var o=crWarm(); setTimeout(function(){ if(S.view==="database") location.hash="map"; setTimeout(function(){ o.classList.remove("on"); setTimeout(function(){ o.remove(); },600); },120); },0); return; }
+  CR.keys={}; CR.v={f:0,t:0}; CR.hover=""; CR.focus=""; CR.cv.classList.remove("pt");
+  var a={x:CR.cam.x,z:CR.cam.z,yaw:CR.cam.yaw}, b=crPose("book"), far=Math.hypot(b.x-a.x,b.z-a.z)+Math.abs(cAng(b.yaw-a.yaw))*1.5;
+  CR.frames=[]; CR.tw={link:true,prep:CMAPB?null:"book",a:a,b:b,g:far<0.05?0:Math.round(Math.min(460,170+far*28)),h:location.hash,t0:0}; crKick(); }
+/* the pages: when each starts to turn, in ms after the first, and how long it takes, slowing towards the last */
+var CRIF=[[0,210],[38,215],[80,222],[128,232],[184,244],[250,260],[328,286]], CRG0=650, CRGD=440, CRWM=130;
+function crLinkStep(w,ts){ if(location.hash!==w.h){ crAbort(); return false; }
+  var e=ts-w.t0, dpr=CR.dpr;
+  if(!w.snap){ var t=w.g?Math.min(1,e/w.g):1, k=cEase(t); CR.cam.x=w.a.x+(w.b.x-w.a.x)*k; CR.cam.z=w.a.z+(w.b.z-w.a.z)*k; CR.cam.yaw=w.a.yaw+cAng(w.b.yaw-w.a.yaw)*k; crRes(t<1); crDraw(ts);
+    if(t<1) return true;
+    if(!CR.page){ crHand(w); return false; }
+    var sc=CR.snapC||(CR.snapC=document.createElement("canvas")); sc.width=CR.cv.width; sc.height=CR.cv.height; sc.getContext("2d").drawImage(CR.cv,0,0); w.snap=sc; w.r0=ts; w.pg=CR.page; return true; }
+  var r=ts-w.r0, ctx=CR.ctx, T=CR.T; ctx.setTransform(1,0,0,1,0,0); ctx.globalCompositeOperation="source-over"; ctx.globalAlpha=1; ctx.drawImage(w.snap,0,0); ctx.setTransform(dpr,0,0,dpr,0,0);
+  if(r<CRG0) crRiffle(ctx,T,w,r); else { if(!w.grow){ w.grow=true; crAura(); } crGrow(ctx,T,w,(r-CRG0)/CRGD); }
+  /* once the map fills the corridor, a moment of warm light, and under it the Map tab */
+  if(r>=CRG0+CRGD-30&&!w.o) w.o=crWarm(true);
+  if(r>=CRG0+CRGD+CRWM){ crHand(w); return false; }
+  return true; }
+/* each frame of the riffle: fresh sheets where pages have lifted or landed, then the pages in the air */
+function crRiffle(ctx,T,w,r){ var n=CRIF.length, pages=[], i;
+  for(i=0;i<n;i++){ var u=Math.max(0,Math.min(1,(r-CRIF[i][0])/CRIF[i][1])); pages.push({i:i,u:u,th:Math.PI*(1-Math.cos(Math.PI*u))/2}); }
+  /* the sheet under the riffle is blank until the last page lifts off the map; the turned pages cover the handwriting */
+  if(pages[0].u>0&&pages[n-1].u<=0) crSheet(ctx,T,1);
+  if(pages[0].u>=1) crSheet(ctx,T,-1);
+  /* the map brightens as it is uncovered */
+  var b=Math.max(0,Math.min(1,(r-CRIF[n-1][0]-CRIF[n-1][1]*0.4)/200)); if(b>0) crBright(ctx,w.pg,b);
+  var air=pages.filter(function(p){ return p.u>0&&p.u<1; }), lf=air.filter(function(p){ return p.th>=Math.PI/2; }).sort(function(a,c){ return c.th-a.th; }), rt=air.filter(function(p){ return p.th<Math.PI/2; }).sort(function(a,c){ return a.th-c.th; });
+  (CR.cam.x>CLX?lf.concat(rt):rt.concat(lf)).forEach(function(p){ crLeaf(ctx,T,w,p); }); }
+/* a turning page, hinged at the spine and bending a little as it goes, lit as it faces up and shadowed edge on */
+function crLeaf(ctx,T,w,p){ var N=6, W=0.282, x=0.004, h=CLIFT*1.6, k=0.6*Math.sin(p.th), pts=[[x,h,p.th]], pg=crPaper(T), P=cBook, j, out=[];
+  for(j=0;j<N;j++){ var ph=p.th-k*(j+0.5)/N; x+=W/N*Math.cos(ph); h+=W/N*Math.sin(ph); pts.push([x,h,ph]); }
+  /* each strip shades smoothly into the next, so the bend reads without seams */
+  var shade=function(i){ var ph=i===0?pts[1][2]:i===N?pts[N][2]:(pts[i][2]+pts[i+1][2])/2; return cStr(cMix(pg,CBLACK,0.27*(1-Math.abs(Math.cos(ph)))+(ph>Math.PI/2?0.04:0))); };
+  for(j=0;j<N;j++){ var a=pts[j], b=pts[j+1], sq=scr([P(a[0],0.1,a[1]),P(b[0],0.1,b[1]),P(b[0],0.9,b[1]),P(a[0],0.9,a[1])]), ga=spt(P(a[0],0.5,a[1]),P(b[0],0.5,b[1])), gb=spt(P(b[0],0.5,b[1]),P(a[0],0.5,a[1]));
+    if(!sq||!ga||!gb) continue; var g=ctx.createLinearGradient(ga[0],ga[1],gb[0],gb[1]); g.addColorStop(0,shade(j)); g.addColorStop(1,shade(j+1)); cPath(ctx,sq); ctx.fillStyle=g; ctx.fill(); ctx.strokeStyle=g; ctx.lineWidth=0.8; ctx.stroke(); }
+  /* the first page carries the map on its face until it stands upright */
+  if(p.i===0&&p.th<Math.PI/2){ var at=function(s){ var i=Math.min(N-1,Math.floor(s/(W/N))), f=(s-i*W/N)/(W/N); return [pts[i][0]+(pts[i+1][0]-pts[i][0])*f,pts[i][1]+(pts[i+1][1]-pts[i][1])*f]; }, m0=at(0.041), m1=at(0.251), hh=0.0008;
+    var win=[P(m0[0],0.86,m0[1]+hh),P(m1[0],0.86,m1[1]+hh),P(m1[0],0.2,m1[1]+hh),P(m0[0],0.2,m0[1]+hh)], q=scr(win);
+    if(q&&CMAP){ cTexQuad(ctx,CMAP,w.pg.crop,win.map(function(v){ return proj(toCam(v)); }),q); cPath(ctx,q); ctx.fillStyle=cStr(CBLACK,0.34*Math.sin(p.th)); ctx.fill(); } }
+  /* a fine edge, so pages in flight read one from another */
+  pts.forEach(function(q){ out.push(P(q[0],0.1,q[1])); }); for(j=N;j>=0;j--) out.push(P(pts[j][0],0.9,pts[j][1]));
+  var so=scr(out); if(so){ cPath(ctx,so); ctx.strokeStyle=cStr(CBLACK,T.dark?0.26:0.13); ctx.lineWidth=0.7; ctx.stroke(); } }
+/* the uncovered map brightens: a wash of light on it and a bloom round it */
+function crBright(ctx,p,b,q){ q=q||p.q; if(b<=0.004) return; var cx=(q[0][0]+q[2][0])/2, cy=(q[0][1]+q[2][1])/2, R=Math.hypot(q[0][0]-q[2][0],q[0][1]-q[2][1])*0.9, g=ctx.createRadialGradient(cx,cy,R*0.3,cx,cy,R);
+  ctx.save(); ctx.globalCompositeOperation="screen"; g.addColorStop(0,cStr([255,226,188],0.32*b)); g.addColorStop(1,cStr([255,226,188],0)); ctx.fillStyle=g; ctx.fillRect(cx-R,cy-R,2*R,2*R);
+  cPath(ctx,q); ctx.fillStyle=cStr([255,244,226],0.26*b); ctx.fill(); ctx.restore(); }
+/* the map grows from the page until it fills the corridor, opening out to the whole world as it comes */
+function crGrow(ctx,T,w,u){ var k=cEase(Math.max(0,Math.min(1,u))), W=CR.w, H=CR.h, p=w.pg, to=[[0,0],[W,0],[W,H],[0,H]], q=p.sq.map(function(a,i){ return [a[0]+(to[i][0]-a[0])*k,a[1]+(to[i][1]-a[1])*k]; });
+  var ca=p.crop, cb=crWorldCrop(W/H); if(ca[0]+ca[2]/2>cb[0]+cb[2]/2+500) cb[0]+=1000;
+  var cr=[0,1,2,3].map(function(i){ return ca[i]+(cb[i]-ca[i])*k; });
+  crSheet(ctx,T,-1); if(k>0){ ctx.fillStyle=cStr(T.dark?[10,9,8]:[248,244,238],0.6*k); ctx.fillRect(0,0,W,H); }
+  cTexQuad(ctx,crMapTex(true)||CMAP,cr,q); crBright(ctx,p,1-k,q); }
+/* the whole world, cut to the corridor's shape: all of it across a wide screen, Europe and Africa in the middle of a narrow one */
+function crWorldCrop(a){ if(a>=2) return [0,255-500/a,1000,1000/a]; var h=Math.min(500,1000/a), wd=h*a; return [530-wd/2,255-h/2,wd,h]; }
+/* the moment of warm light; quick when it ends the riffle */
+function crWarm(quick){ var o=document.createElement("div"); o.className="clink"+(quick?" quick":""); document.body.appendChild(o); requestAnimationFrame(function(){ o.classList.add("on"); }); return o; }
+/* The hand-over: the Map tab takes the address, so Back returns here, and the corridor then walks back out from the book.
+   The address is only ever changed from the Knowledge tab's own address, so a riffle left behind rewrites no other. */
+function crHand(w){ var o=w.o||crWarm(true); CR.tw=null; w.snap=null; CV.last="book";
+  if(S.view==="database"&&location.hash===w.h){ $("kCorrBox").hidden=true; location.hash="map"; } else if(CV.on) CR.cam={x:CHOME.x,z:CHOME.z,yaw:CHOME.yaw};
+  setTimeout(function(){ o.classList.remove("on"); setTimeout(function(){ o.remove(); },650); },w.o?90:260); }
+/* The page's light breathes: a soft glow laid over the canvas at the page and animated by the browser alone, so the idle
+   corridor still asks for no frames. It hides when the page is out of view, while the map grows and with reduced motion. */
+function crAura(){ var el=CR.aura; if(!el) return; var p=CR.page, w=CR.tw, show=!!p&&!CREDUCE&&!(w&&w.grow)&&p.cx>-p.r&&p.cx<CR.w+p.r&&p.cy>-p.r&&p.cy<CR.h+p.r;
+  if(el.hidden===show) el.hidden=!show; if(show) el.style.transform="translate("+p.cx.toFixed(1)+"px,"+p.cy.toFixed(1)+"px) scale("+(Math.max(0.64,p.r*0.06)).toFixed(3)+")"; }
 function crMount(){ if($("kCorr")){ crSize(); return; }
-  $("kCorrBox").innerHTML='<div class="corr" id="kCorr"><canvas id="kCv" aria-label="A corridor of bookcases: Runs and Concepts on the left, News and Regulation on the right, Methods at the end"></canvas><div class="clabs" id="cLabs">'+CASES.map(function(k){ var nm=CSECT.filter(function(s){return s[0]===k.s;})[0][1]; return '<button type="button" class="clab" data-cgo="'+k.s+'"><span>'+nm+'<span class="n"></span></span></button>'; }).join("")+'</div></div>';
-  CR.cv=$("kCv"); CR.ctx=CR.cv.getContext("2d"); crSize(); crEvents(); }
+  $("kCorrBox").innerHTML='<div class="corr" id="kCorr"><canvas id="kCv" aria-label="A corridor of bookcases: Runs and Concepts on the left, News and Regulation on the right, Methods at the end beside an open book"></canvas><div class="caura" id="cAura" hidden aria-hidden="true"><i></i></div><div class="clabs" id="cLabs">'+CASES.map(function(k){ var nm=CSECT.filter(function(s){return s[0]===k.s;})[0][1]; return '<button type="button" class="clab" data-cgo="'+k.s+'"><span>'+nm+'<span class="n"></span></span></button>'; }).join("")+'</div></div>';
+  CR.cv=$("kCv"); CR.ctx=CR.cv.getContext("2d"); CR.aura=$("cAura"); crSize(); crEvents(); }
 /* Framed as the first corridor: on a wide screen its mouth fills the width, seen from a little way back. A portrait
    phone stands closer with the eye lower, so the cases fill the frame rather than the floor. On a short screen the
    corridor is no taller than the space below the search, and the view widens just enough that the cases still fit. */
@@ -4313,7 +4456,7 @@ document.addEventListener("keydown",function(e){ var k=CKEY[e.key]; if(!k||!CV.o
   var r=$("kCorr").getBoundingClientRect(); if(r.bottom<60||r.top>innerHeight-60) return; e.preventDefault(); if(CR.tw) return; CR.keys[k]=1; CR.moved=true; crKick(); });
 document.addEventListener("keyup",function(e){ var k=CKEY[e.key]; if(k){ delete CR.keys[k]; crKick(); } });
 window.addEventListener("blur",function(){ CR.keys={}; });
-window.addEventListener("resize",function(){ if(CV.on&&$("kCorr")&&S.view==="database"){ crSize(); crDraw(); } });
+window.addEventListener("resize",function(){ if(CV.on&&$("kCorr")&&S.view==="database"){ if(CR.tw&&CR.tw.link) CR.tw.snap=null; crSize(); crDraw(); } });
 document.addEventListener("visibilitychange",function(){ if(!document.hidden) crKick(); });
 try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change",function(){ if(CV.on){ CR.T=cPal(); torchRest(); crDraw(); crKick(); } }); }catch(e){}
 window.addEventListener("dtt-theme",function(){ CMAPSIG=""; if(CV.on){ CR.T=cPal(); torchRest(); crDraw(); crKick(); } });
@@ -4328,12 +4471,12 @@ renderDatabase=function(){ var h=location.hash; if(/^#knowledge\/corridor/.test(
   if(CR.tw) return;
   if(on&&S.view==="database"&&box.hidden){ crShow(); return; }
   $("v-database").classList.toggle("corrv",on); box.hidden=!on; crToggle();
-  if(on){ crAddr("#knowledge/corridor"); crMount(); crBooks(); crDraw(); crKick(); } };
+  if(on){ crAddr("#knowledge/corridor"); crMount(); crBooks(); crDraw(); crKick(); crMapSoon(); } };
 /* an entry opened from anywhere else always shows in the list */
 var _cReveal=kReveal; kReveal=function(sec,sel){ if(CV.on||CR.tw){ if(CR.tw) crAbort(); clearTimeout(CR.t1); CV.on=false; $("v-database").classList.remove("corrv"); $("kCorrBox").hidden=true; crToggle(); } _cReveal(sec,sel); };
 document.addEventListener("click",function(e){ var t=e.target.closest("[data-kview]"); if(!t) return; var v=t.getAttribute("data-kview"); if(v==="corridor"&&!CV.on) crShow(); else if(v==="list"&&(CV.on||CR.tw)) crHide(); });
 /* for the browser tests, as window.__pmap is for the map */
-window.__corr={CV:CV,CR:CR,hit:crHit,onPage:crOnPage,draw:crDraw,home:CHOME};
+window.__corr={CV:CV,CR:CR,hit:crHit,onPage:crOnPage,draw:crDraw,home:CHOME,pose:crPose,cases:CASES};
 /* ---------- Companies: a map layer of the firms that make the software and the networking for pooled training ---------- */
 /* Runs when the cache loads, before this file's variables are set, so it refers to none of them. */
 function normCompany(d){
